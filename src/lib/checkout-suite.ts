@@ -74,13 +74,39 @@ function occupiesSuite(booking: { suite_id: string; rooms: number }, suiteId: st
   return booking.suite_id === suiteId;
 }
 
+function isActiveHold(booking: {
+  payment_status: string;
+  created_at?: string;
+}) {
+  if (booking.payment_status === "paid") return true;
+  if (booking.payment_status !== "pending" || !booking.created_at) return false;
+  const ageMs = Date.now() - new Date(booking.created_at).getTime();
+  return ageMs < 20 * 60 * 1000;
+}
+
+export async function expireStalePendingBookings(admin: AdminClient) {
+  const cutoff = new Date(Date.now() - 20 * 60 * 1000).toISOString();
+  await admin
+    .from("bookings")
+    .update({
+      status: "cancelled",
+      payment_status: "failed",
+      updated_at: new Date().toISOString(),
+    })
+    .eq("status", "pending")
+    .eq("payment_status", "pending")
+    .lt("created_at", cutoff);
+}
+
 export async function assertStayAvailable(
   admin: AdminClient,
   input: { suiteId: string; rooms: number; checkIn: string; checkOut: string }
 ): Promise<string | null> {
+  await expireStalePendingBookings(admin);
+
   const { data, error } = await admin
     .from("bookings")
-    .select("suite_id, rooms, check_in, check_out, status, payment_status")
+    .select("suite_id, rooms, check_in, check_out, status, payment_status, created_at")
     .neq("status", "cancelled")
     .in("payment_status", ["pending", "paid"])
     .lt("check_in", input.checkOut)
@@ -90,10 +116,11 @@ export async function assertStayAvailable(
     return null;
   }
 
+  const blocking = (data ?? []).filter(isActiveHold);
   const needed = input.rooms >= 2 ? ["unit-a", "unit-b"] : [input.suiteId];
 
   for (const suiteId of needed) {
-    const taken = (data ?? []).some((booking) => occupiesSuite(booking, suiteId));
+    const taken = blocking.some((booking) => occupiesSuite(booking, suiteId));
     if (taken) {
       return "Those dates are already reserved. Please choose different dates or the other suite.";
     }
