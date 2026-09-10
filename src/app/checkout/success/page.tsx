@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { BOOK_NOW_HREF } from "@/lib/booking";
-import { formatNaira } from "@/lib/suites";
+import { formatNaira, lastNightFromCheckout } from "@/lib/suites";
 
 type BookingSummary = {
   id: string;
@@ -125,8 +125,12 @@ function SuccessContent() {
                   <strong>{booking.checkIn}</strong>
                 </li>
                 <li>
-                  <span>Check out</span>
-                  <strong>{booking.checkOut}</strong>
+                  <span>Last night in suite</span>
+                  <strong>{lastNightFromCheckout(booking.checkOut)}</strong>
+                </li>
+                <li>
+                  <span>Leave by</span>
+                  <strong>{booking.checkOut} · 11:00 AM</strong>
                 </li>
                 <li>
                   <span>Nights</span>

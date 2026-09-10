@@ -95,12 +95,35 @@ export function formatNaira(amount: number) {
   return `₦${amount.toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
+export function addCalendarDays(value: string, days: number) {
+  const date = new Date(`${value}T12:00:00`);
+  date.setDate(date.getDate() + days);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+/** Hotel checkout morning (leave by 11:00 AM). */
+export function checkoutFromLastNight(lastNight: string) {
+  return addCalendarDays(lastNight, 1);
+}
+
+export function lastNightFromCheckout(checkOut: string) {
+  return addCalendarDays(checkOut, -1);
+}
+
 export function nightsBetween(checkIn: string, checkOut: string) {
   const start = new Date(`${checkIn}T12:00:00`);
   const end = new Date(`${checkOut}T12:00:00`);
   if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return 0;
   const diff = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
   return Math.max(diff, 0);
+}
+
+/** Monday through Wednesday night is 3 nights; leave Thursday morning. */
+export function nightsThroughLastNight(checkIn: string, lastNight: string) {
+  return nightsBetween(checkIn, checkoutFromLastNight(lastNight));
 }
 
 /** Caution is a flat ₦50,000 per stay, even when both suites are booked. */

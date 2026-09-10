@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import { type MouseEvent, useMemo, useState } from "react";
-import { cautionFeeForStay, formatNaira, nightsBetween, type SuiteProduct } from "@/lib/suites";
+import {
+  addCalendarDays,
+  cautionFeeForStay,
+  checkoutFromLastNight,
+  formatNaira,
+  nightsThroughLastNight,
+  type SuiteProduct,
+} from "@/lib/suites";
 
 function toInputDate(date: Date) {
   const year = date.getFullYear();
@@ -11,22 +18,17 @@ function toInputDate(date: Date) {
   return `${year}-${month}-${day}`;
 }
 
-function addDays(value: string, days: number) {
-  const date = new Date(`${value}T12:00:00`);
-  date.setDate(date.getDate() + days);
-  return toInputDate(date);
-}
-
 export default function BookingWidget({ suite }: { suite: SuiteProduct }) {
   const today = useMemo(() => toInputDate(new Date()), []);
   const [checkIn, setCheckIn] = useState(today);
-  const [checkOut, setCheckOut] = useState(addDays(today, 2));
+  const [lastNight, setLastNight] = useState(addCalendarDays(today, 1));
   const [rooms, setRooms] = useState(1);
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
   const [error, setError] = useState("");
 
-  const nights = nightsBetween(checkIn, checkOut);
+  const nights = nightsThroughLastNight(checkIn, lastNight);
+  const checkOut = checkoutFromLastNight(lastNight);
   const maxGuestsAllowed = suite.maxGuests * rooms;
   const guestCount = adults + children;
   const stayTotal = suite.pricePerNight * Math.max(nights, 1) * rooms;
@@ -48,7 +50,7 @@ export default function BookingWidget({ suite }: { suite: SuiteProduct }) {
   function handleContinue(event: MouseEvent<HTMLAnchorElement>) {
     if (!canContinue) {
       event.preventDefault();
-      if (nights < 1) setError("Check-out must be at least one night after check-in.");
+      if (nights < 1) setError("Choose a last night on or after check-in.");
       else if (guestCount > maxGuestsAllowed) {
         setError(`With ${rooms} suite(s), you can host up to ${maxGuestsAllowed} guests.`);
       } else setError("Please complete your stay details.");
@@ -79,8 +81,8 @@ export default function BookingWidget({ suite }: { suite: SuiteProduct }) {
               const nextIn = event.target.value || today;
               setCheckIn(nextIn);
               setError("");
-              if (nightsBetween(nextIn, checkOut) < 1) {
-                setCheckOut(addDays(nextIn, 1));
+              if (nightsThroughLastNight(nextIn, lastNight) < 1) {
+                setLastNight(nextIn);
               }
             }}
           />
@@ -90,14 +92,14 @@ export default function BookingWidget({ suite }: { suite: SuiteProduct }) {
           <span>{Math.max(nights, 1) === 1 ? "night" : "nights"}</span>
         </div>
         <label className="booking-date-field">
-          <span>Check out</span>
+          <span>Last night</span>
           <input
             type="date"
             className="booking-date-input"
-            value={checkOut}
-            min={addDays(checkIn, 1)}
+            value={lastNight}
+            min={checkIn}
             onChange={(event) => {
-              setCheckOut(event.target.value || addDays(checkIn, 1));
+              setLastNight(event.target.value || checkIn);
               setError("");
             }}
           />

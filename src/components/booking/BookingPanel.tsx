@@ -3,7 +3,16 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { cautionFeeForStay, formatNaira, nightsBetween, suites, type SuiteProduct } from "@/lib/suites";
+import {
+  addCalendarDays,
+  cautionFeeForStay,
+  checkoutFromLastNight,
+  formatNaira,
+  lastNightFromCheckout,
+  nightsThroughLastNight,
+  suites,
+  type SuiteProduct,
+} from "@/lib/suites";
 
 type SuiteChoice = "unit-a" | "unit-b" | "both";
 
@@ -12,12 +21,6 @@ function toInputDate(date: Date) {
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
-}
-
-function addDays(value: string, days: number) {
-  const date = new Date(`${value}T12:00:00`);
-  date.setDate(date.getDate() + days);
-  return toInputDate(date);
 }
 
 function formatLongDate(value: string) {
@@ -69,14 +72,15 @@ export default function BookingPanel({ initialSuite, embedded = false }: Booking
     return "unit-a";
   });
   const [checkIn, setCheckIn] = useState(today);
-  const [checkOut, setCheckOut] = useState(addDays(today, 2));
+  const [lastNight, setLastNight] = useState(addCalendarDays(today, 1));
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
   const [error, setError] = useState("");
   const [hydratedFromUrl, setHydratedFromUrl] = useState(false);
 
   const { suite, rooms, label, maxGuests } = resolveChoice(choice);
-  const nights = nightsBetween(checkIn, checkOut);
+  const nights = nightsThroughLastNight(checkIn, lastNight);
+  const checkOut = checkoutFromLastNight(lastNight);
   const guestCount = adults + children;
   const stayTotal = suite.pricePerNight * Math.max(nights, 1) * rooms;
   const cautionTotal = cautionFeeForStay(suite.cautionFee);
@@ -103,7 +107,13 @@ export default function BookingPanel({ initialSuite, embedded = false }: Booking
     else if (suiteParam === "unit-a") setChoice("unit-a");
 
     if (checkInParam) setCheckIn(checkInParam);
-    if (checkOutParam) setCheckOut(checkOutParam);
+    if (checkOutParam) {
+      const nextIn = checkInParam ?? today;
+      const nextLast = lastNightFromCheckout(checkOutParam);
+      setLastNight(nightsThroughLastNight(nextIn, nextLast) < 1 ? nextIn : nextLast);
+    } else if (checkInParam) {
+      setLastNight(addCalendarDays(checkInParam, 1));
+    }
     if (adultsParam >= 1) setAdults(adultsParam);
     if (childrenParam >= 0 && searchParams.has("children")) setChildren(childrenParam);
     setHydratedFromUrl(true);
@@ -135,7 +145,7 @@ export default function BookingPanel({ initialSuite, embedded = false }: Booking
 
   function continueToCheckout() {
     if (!canContinue) {
-      if (nights < 1) setError("Choose a check-out at least one night after check-in.");
+      if (nights < 1) setError("Choose a last night on or after check-in.");
       else if (guestCount > maxGuests) setError(`This selection allows up to ${maxGuests} guests.`);
       else setError("Complete your stay details to continue.");
       return;
@@ -211,7 +221,7 @@ export default function BookingPanel({ initialSuite, embedded = false }: Booking
                   const nextIn = event.target.value || today;
                   setCheckIn(nextIn);
                   setError("");
-                  if (nightsBetween(nextIn, checkOut) < 1) setCheckOut(addDays(nextIn, 1));
+                  if (nightsThroughLastNight(nextIn, lastNight) < 1) setLastNight(nextIn);
                 }}
               />
             </label>
@@ -222,16 +232,16 @@ export default function BookingPanel({ initialSuite, embedded = false }: Booking
             </div>
 
             <label className="booking-date-card">
-              <span>Check out</span>
-              <strong>{formatLongDate(checkOut)}</strong>
+              <span>Last night</span>
+              <strong>{formatLongDate(lastNight)}</strong>
               <input
                 className="booking-date-native"
                 type="date"
-                value={checkOut}
-                min={addDays(checkIn, 1)}
-                aria-label="Check-out date"
+                value={lastNight}
+                min={checkIn}
+                aria-label="Last night in the suite"
                 onChange={(event) => {
-                  setCheckOut(event.target.value || addDays(checkIn, 1));
+                  setLastNight(event.target.value || checkIn);
                   setError("");
                 }}
               />
@@ -298,7 +308,7 @@ export default function BookingPanel({ initialSuite, embedded = false }: Booking
             <li>
               <span>Dates</span>
               <strong>
-                {formatLongDate(checkIn)} → {formatLongDate(checkOut)}
+                {formatLongDate(checkIn)} through {formatLongDate(lastNight)} night · leave {formatLongDate(checkOut)} 11:00 AM
               </strong>
             </li>
             <li>

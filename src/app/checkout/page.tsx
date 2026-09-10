@@ -6,7 +6,7 @@ import { FormEvent, Suspense, useEffect, useMemo, useState } from "react";
 import { BOOK_NOW_HREF } from "@/lib/booking";
 import { openFlutterwaveCheckout } from "@/lib/flutterwave-inline";
 import { createClient } from "@/lib/supabase/client";
-import { cautionFeeForStay, formatNaira, getSuite, nightsBetween } from "@/lib/suites";
+import { cautionFeeForStay, formatNaira, getSuite, lastNightFromCheckout, nightsBetween } from "@/lib/suites";
 
 function formatDisplayDate(value: string | null) {
   if (!value) return null;
@@ -77,7 +77,8 @@ function CheckoutContent() {
     const lines = [
       `Hello The O' Apartments, I'd like to book ${bothSuites ? "Unit A + Unit B" : suite?.title ?? "a suite"}.`,
       `Check-in: ${checkIn ?? "-"}`,
-      `Check-out: ${checkOut ?? "-"}`,
+      `Last night: ${checkOut ? lastNightFromCheckout(checkOut) : "-"}`,
+      `Leave by: ${checkOut ?? "-"} 11:00 AM`,
       `Nights: ${nights}`,
       `Suites: ${rooms}, Adults: ${adults}, Children: ${children}`,
       `Stay: ${formatNaira(stayTotal)}`,
@@ -270,8 +271,12 @@ function CheckoutContent() {
                 <strong>{formatDisplayDate(checkIn)}</strong>
               </li>
               <li>
-                <span>Check out</span>
-                <strong>{formatDisplayDate(checkOut)}</strong>
+                <span>Last night in suite</span>
+                <strong>{formatDisplayDate(checkOut ? lastNightFromCheckout(checkOut) : null)}</strong>
+              </li>
+              <li>
+                <span>Leave by</span>
+                <strong>{formatDisplayDate(checkOut)} · 11:00 AM</strong>
               </li>
               <li>
                 <span>Nights</span>
