@@ -3,26 +3,27 @@
 import { useState } from "react";
 import type { SuiteProduct } from "@/lib/suites";
 
-type Tab = "description" | "accommodation" | "reviews";
+type Tab = "description" | "accommodation";
 
 export default function SuiteTabs({ suite }: { suite: SuiteProduct }) {
   const [tab, setTab] = useState<Tab>("description");
 
   return (
     <section className="suite-tabs">
-      <div className="suite-tab-list" role="tablist">
+      <div className="suite-tab-list" role="tablist" aria-label="Suite details">
         {(
           [
             ["description", "Description"],
-            ["accommodation", "Accommodation Info"],
-            ["reviews", "Reviews (0)"],
+            ["accommodation", "Accommodation"],
           ] as const
         ).map(([id, label]) => (
           <button
             key={id}
             type="button"
+            id={`tab-${id}`}
             role="tab"
             aria-selected={tab === id}
+            aria-controls={`panel-${id}`}
             className={tab === id ? "suite-tab active" : "suite-tab"}
             onClick={() => setTab(id)}
           >
@@ -31,35 +32,29 @@ export default function SuiteTabs({ suite }: { suite: SuiteProduct }) {
         ))}
       </div>
 
-      <div className="suite-tab-panel">
+      <div className="suite-tab-panel" role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
         {tab === "description" ? (
           <>
             {suite.description.split("\n\n").map((paragraph) => (
-              <p key={paragraph.slice(0, 40)}>{paragraph}</p>
+              <p key={paragraph.slice(0, 48)}>{paragraph}</p>
             ))}
             <h3>What this suite offers</h3>
             <div className="suite-offers">
               {suite.offers.map((offer) => (
                 <div key={offer.label} className="suite-offer">
-                  <span>{offer.icon}</span>
+                  <span aria-hidden="true">{offer.icon}</span>
                   <strong>{offer.label}</strong>
                 </div>
               ))}
             </div>
           </>
-        ) : null}
-
-        {tab === "accommodation" ? (
+        ) : (
           <ul className="suite-accommodation">
             {suite.accommodation.map((item) => (
-              <li key={item}>✓ {item}</li>
+              <li key={item}>{item}</li>
             ))}
           </ul>
-        ) : null}
-
-        {tab === "reviews" ? (
-          <p>No reviews yet. Be the first guest to share your stay at {suite.title}.</p>
-        ) : null}
+        )}
       </div>
     </section>
   );

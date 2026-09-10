@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { markBookingPaid } from "@/lib/payments";
 import { isValidFlutterwaveWebhook, verifyFlutterwaveTransaction } from "@/lib/flutterwave";
 
 export async function POST(request: Request) {
@@ -14,10 +14,7 @@ export async function POST(request: Request) {
         id?: number;
         tx_ref?: string;
         status?: string;
-        amount?: number;
-        currency?: string;
       };
-      event?: string;
     };
 
     const data = payload.data;
@@ -30,36 +27,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true, paid: false });
     }
 
-    const admin = createAdminClient();
-    const { data: booking } = await admin
-      .from("bookings")
-      .select("id, total, payment_status, status")
-      .eq("flutterwave_tx_ref", verified.txRef)
-      .maybeSingle();
-
-    if (!booking) {
-      return NextResponse.json({ ok: true, missing: true });
-    }
-
-    if (Math.round(Number(booking.total) * 100) !== Math.round(verified.amount * 100)) {
-      return NextResponse.json({ ok: true, amountMismatch: true });
-    }
-
-    if (booking.payment_status !== "paid") {
-      await admin
-        .from("bookings")
-        .update({
-          payment_status: "paid",
-          status: booking.status === "pending" ? "confirmed" : booking.status,
-          flutterwave_tx_id: String(verified.id),
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", booking.id);
-    }
-
+    await markBookingPaid(verified.txRef, String(verified.id), verified.amount);
     return NextResponse.json({ ok: true, paid: true });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Webhook error";
+    console.error("[flutterwave webhook]", message);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

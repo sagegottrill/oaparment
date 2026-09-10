@@ -15,7 +15,11 @@ function isBareLayout(pathname: string) {
 }
 
 function hideBookCta(pathname: string) {
-  return pathname.startsWith("/rooms/") || pathname.startsWith("/checkout");
+  return (
+    pathname.startsWith("/rooms/") ||
+    pathname.startsWith("/checkout") ||
+    pathname.startsWith("/book")
+  );
 }
 
 export default function SiteChrome({ children }: { children: ReactNode }) {

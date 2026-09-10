@@ -1,46 +1,6 @@
 import { NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { markBookingFailed, markBookingPaid } from "@/lib/payments";
 import { verifyFlutterwaveTransaction } from "@/lib/flutterwave";
-
-async function markBookingPaid(txRef: string, txId: string, amount: number) {
-  const admin = createAdminClient();
-
-  const { data: booking, error: findError } = await admin
-    .from("bookings")
-    .select("*")
-    .eq("flutterwave_tx_ref", txRef)
-    .maybeSingle();
-
-  if (findError) throw new Error(findError.message);
-  if (!booking) throw new Error("Booking not found for this payment reference.");
-
-  const expected = Number(booking.total);
-  if (Math.round(expected * 100) !== Math.round(amount * 100)) {
-    throw new Error("Paid amount does not match booking total.");
-  }
-
-  if (booking.payment_status === "paid") {
-    return booking;
-  }
-
-  const { data: updated, error: updateError } = await admin
-    .from("bookings")
-    .update({
-      payment_status: "paid",
-      status: booking.status === "pending" ? "confirmed" : booking.status,
-      flutterwave_tx_id: txId,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", booking.id)
-    .select("*")
-    .single();
-
-  if (updateError || !updated) {
-    throw new Error(updateError?.message ?? "Could not update booking payment.");
-  }
-
-  return updated;
-}
 
 export async function POST(request: Request) {
   try {
@@ -51,21 +11,21 @@ export async function POST(request: Request) {
     };
 
     if (!body.transactionId) {
-      return NextResponse.json({ error: "transactionId is required." }, { status: 400 });
+      if (body.txRef) await markBookingFailed(body.txRef).catch(() => undefined);
+      return NextResponse.json({ error: "Missing transaction details from Flutterwave.", paid: false }, { status: 400 });
     }
 
-    if (body.status && body.status !== "successful" && body.status !== "completed") {
-      return NextResponse.json(
-        { error: "Payment was not successful.", paid: false },
-        { status: 400 }
-      );
+    if (body.status && !["successful", "completed"].includes(body.status)) {
+      if (body.txRef) await markBookingFailed(body.txRef).catch(() => undefined);
+      return NextResponse.json({ error: "Payment was not successful.", paid: false }, { status: 400 });
     }
 
     const verified = await verifyFlutterwaveTransaction(body.transactionId);
 
     if (verified.status !== "successful") {
+      await markBookingFailed(verified.txRef).catch(() => undefined);
       return NextResponse.json(
-        { error: "Flutterwave reports payment was not successful.", paid: false, verified },
+        { error: "Flutterwave reports payment was not successful.", paid: false },
         { status: 400 }
       );
     }
@@ -78,11 +38,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Transaction reference mismatch.", paid: false }, { status: 400 });
     }
 
-    const booking = await markBookingPaid(
-      verified.txRef,
-      String(verified.id),
-      verified.amount
-    );
+    const booking = await markBookingPaid(verified.txRef, String(verified.id), verified.amount);
 
     return NextResponse.json({
       paid: true,

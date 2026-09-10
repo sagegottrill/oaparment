@@ -1,85 +1,49 @@
 import Link from "next/link";
 import { blogPosts } from "@/lib/blog";
+import { BOOK_NOW_HREF } from "@/lib/booking";
 
 export default function BlogPage() {
   return (
-    <main>
+    <main className="page-shell">
       <section className="page-hero">
         <div className="container">
           <p className="eyebrow">Stories & tips</p>
-          <h1 style={{ margin: 0 }}>Our Blog</h1>
+          <h1>Our Blog</h1>
+          <p>Guides, local notes, and stay ideas from The O&apos; Apartments in Ilaro.</p>
         </div>
       </section>
 
-      <section className="container" style={{ padding: "var(--spacing-3xl) var(--spacing-md)" }}>
-        <div className="grid grid-cols-3 gap-xl">
+      <section className="container book-wide section-pad">
+        <div className="blog-grid">
           {blogPosts.map((post) => (
-            <article
-              key={post.id}
-              className="card"
-              style={{ padding: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}
-            >
-              <div
-                style={{
-                  height: "220px",
-                  backgroundImage: `url(${post.image})`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                }}
-              />
-              <div style={{ padding: "var(--spacing-xl)", display: "flex", flexDirection: "column", flex: 1 }}>
-                <span
-                  style={{
-                    color: "var(--color-primary)",
-                    fontSize: "0.8rem",
-                    textTransform: "uppercase",
-                    letterSpacing: "1px",
-                    fontWeight: 600,
-                    marginBottom: "var(--spacing-sm)",
-                  }}
-                >
-                  {post.category}
-                </span>
-
-                <h2 style={{ fontSize: "1.25rem", marginBottom: "var(--spacing-sm)", lineHeight: 1.4 }}>
-                  <Link href={`/blog/${post.id}`} className="hover-link" style={{ color: "var(--color-text)" }}>
+            <article key={post.id} className="card blog-card">
+              <div className="blog-card-image" style={{ backgroundImage: `url(${post.image})` }} />
+              <div className="blog-card-body">
+                <span className="blog-card-category">{post.category}</span>
+                <h2>
+                  <Link href={`/blog/${post.id}`} className="hover-link">
                     {post.title}
                   </Link>
                 </h2>
-
-                <div
-                  style={{
-                    fontSize: "0.8rem",
-                    color: "var(--color-text-muted)",
-                    marginBottom: "var(--spacing-md)",
-                    display: "flex",
-                    gap: "12px",
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <span>📅 {post.date}</span>
-                  <span>👤 {post.author}</span>
+                <div className="blog-card-meta">
+                  <span>{post.date}</span>
+                  <span>{post.author}</span>
                 </div>
-
-                <p style={{ fontSize: "0.95rem", color: "var(--color-text-muted)", marginBottom: "var(--spacing-lg)", flex: 1 }}>
-                  {post.excerpt}…
-                </p>
-
-                <Link
-                  href={`/blog/${post.id}`}
-                  style={{
-                    color: "var(--color-brand-green)",
-                    fontWeight: 600,
-                    fontSize: "0.9rem",
-                    display: "inline-flex",
-                    alignItems: "center",
-                  }}
-                >
-                  Read More →
+                <p>{post.excerpt}…</p>
+                <Link href={`/blog/${post.id}`} className="blog-card-link">
+                  Read more →
                 </Link>
               </div>
             </article>
           ))}
+        </div>
+
+        <div className="page-cta">
+          <h2>Plan your stay in Ilaro</h2>
+          <p>Ready when you are — pick a suite and dates on our booking page.</p>
+          <Link href={BOOK_NOW_HREF} className="btn btn-primary">
+            Book Now
+          </Link>
         </div>
       </section>
     </main>

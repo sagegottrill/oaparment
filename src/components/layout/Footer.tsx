@@ -17,7 +17,7 @@ export default function Footer() {
         <div>
           <Link href="/" aria-label="The O' Apartments home" style={{ display: "inline-block", marginBottom: "var(--spacing-md)" }}>
             <Image
-              src="/logo.png"
+              src="/logo-footer.png"
               alt="The O' Apartments"
               width={260}
               height={68}

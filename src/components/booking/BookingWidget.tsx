@@ -1,117 +1,137 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import { formatNaira, type SuiteProduct } from "@/lib/suites";
+import { type MouseEvent, useMemo, useState } from "react";
+import { formatNaira, nightsBetween, type SuiteProduct } from "@/lib/suites";
 
 function toInputDate(date: Date) {
-  return date.toISOString().slice(0, 10);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
-function nightsBetween(checkIn: string, checkOut: string) {
-  const start = new Date(`${checkIn}T12:00:00`);
-  const end = new Date(`${checkOut}T12:00:00`);
-  const diff = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-  return Math.max(diff, 1);
-}
-
-function formatDisplayDate(value: string) {
+function addDays(value: string, days: number) {
   const date = new Date(`${value}T12:00:00`);
-  return date.toLocaleDateString("en-GB", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  });
+  date.setDate(date.getDate() + days);
+  return toInputDate(date);
 }
 
-type Props = {
-  suite: SuiteProduct;
-};
-
-export default function BookingWidget({ suite }: Props) {
-  const today = useMemo(() => new Date(), []);
-  const tomorrow = useMemo(() => {
-    const next = new Date();
-    next.setDate(next.getDate() + 1);
-    return next;
-  }, []);
-
-  const [checkIn, setCheckIn] = useState(toInputDate(today));
-  const [checkOut, setCheckOut] = useState(toInputDate(tomorrow));
+export default function BookingWidget({ suite }: { suite: SuiteProduct }) {
+  const today = useMemo(() => toInputDate(new Date()), []);
+  const [checkIn, setCheckIn] = useState(today);
+  const [checkOut, setCheckOut] = useState(addDays(today, 1));
   const [rooms, setRooms] = useState(1);
-  const [adults, setAdults] = useState(1);
+  const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
+  const [error, setError] = useState("");
 
   const nights = nightsBetween(checkIn, checkOut);
-  const stayTotal = suite.pricePerNight * nights * rooms;
-  const grandTotal = stayTotal + suite.cautionFee;
+  const maxGuestsAllowed = suite.maxGuests * rooms;
+  const guestCount = adults + children;
+  const stayTotal = suite.pricePerNight * Math.max(nights, 1) * rooms;
+  const cautionTotal = suite.cautionFee * rooms;
+  const grandTotal = stayTotal + cautionTotal;
+  const canContinue = nights >= 1 && guestCount >= 1 && guestCount <= maxGuestsAllowed;
 
-  function bump(setter: (value: number) => void, value: number, min: number, max: number, delta: number) {
+  function bump(
+    setter: (value: number) => void,
+    value: number,
+    min: number,
+    max: number,
+    delta: number
+  ) {
     setter(Math.min(max, Math.max(min, value + delta)));
+    setError("");
   }
 
-  const checkoutHref = `/checkout?suite=${suite.id}&checkIn=${checkIn}&checkOut=${checkOut}&nights=${nights}&rooms=${rooms}&adults=${adults}&children=${children}`;
+  function handleContinue(event: MouseEvent<HTMLAnchorElement>) {
+    if (!canContinue) {
+      event.preventDefault();
+      if (nights < 1) setError("Check-out must be at least one night after check-in.");
+      else if (guestCount > maxGuestsAllowed) {
+        setError(`With ${rooms} suite(s), you can host up to ${maxGuestsAllowed} guests.`);
+      } else setError("Please complete your stay details.");
+    }
+  }
+
+  const checkoutHref = `/checkout?suite=${suite.id}&checkIn=${checkIn}&checkOut=${checkOut}&nights=${Math.max(nights, 1)}&rooms=${rooms}&adults=${adults}&children=${children}`;
 
   return (
     <aside className="booking-widget card">
-      <div className="booking-price-line">
-        <span className="booking-from">From:</span>
-        <strong>{formatNaira(suite.pricePerNight)}</strong>
-        <span className="booking-per">/night</span>
+      <div className="booking-widget-head">
+        <p className="booking-widget-kicker">Reserve this suite</p>
+        <div className="booking-price-line">
+          <strong>{formatNaira(suite.pricePerNight)}</strong>
+          <span className="booking-per">/ night · per suite</span>
+        </div>
       </div>
 
-      <div className="booking-date-row">
-        <label className="booking-field">
-          <span>Check In</span>
-          <strong>{formatDisplayDate(checkIn)}</strong>
+      <div className="booking-dates-stack">
+        <label className="booking-date-field">
+          <span>Check in</span>
           <input
             type="date"
-            className="input"
+            className="booking-date-input"
             value={checkIn}
-            min={toInputDate(today)}
+            min={today}
             onChange={(event) => {
-              const nextIn = event.target.value;
+              const nextIn = event.target.value || today;
               setCheckIn(nextIn);
-              if (new Date(checkOut) <= new Date(nextIn)) {
-                const nextOut = new Date(`${nextIn}T12:00:00`);
-                nextOut.setDate(nextOut.getDate() + 1);
-                setCheckOut(toInputDate(nextOut));
+              setError("");
+              if (nightsBetween(nextIn, checkOut) < 1) {
+                setCheckOut(addDays(nextIn, 1));
               }
             }}
           />
         </label>
-        <div className="booking-nights-pill">
-          <strong>{nights}</strong>
-          <span>{nights === 1 ? "night" : "nights"}</span>
+        <div className="booking-nights-pill" aria-live="polite">
+          <strong>{Math.max(nights, 1)}</strong>
+          <span>{Math.max(nights, 1) === 1 ? "night" : "nights"}</span>
         </div>
-        <label className="booking-field">
-          <span>Check Out</span>
-          <strong>{formatDisplayDate(checkOut)}</strong>
+        <label className="booking-date-field">
+          <span>Check out</span>
           <input
             type="date"
-            className="input"
+            className="booking-date-input"
             value={checkOut}
-            min={checkIn}
-            onChange={(event) => setCheckOut(event.target.value)}
+            min={addDays(checkIn, 1)}
+            onChange={(event) => {
+              setCheckOut(event.target.value || addDays(checkIn, 1));
+              setError("");
+            }}
           />
         </label>
       </div>
 
       <div className="booking-guests">
-        <h4>Rooms & Guests</h4>
+        <h4>Suites & guests</h4>
+        <p className="booking-capacity">
+          Book 1 or 2 suites · up to {maxGuestsAllowed} guests for this selection
+        </p>
         {[
-          { label: "Rooms", value: rooms, min: 1, max: suite.maxRooms, set: setRooms },
-          { label: "Adults", value: adults, min: 1, max: suite.maxGuests, set: setAdults },
-          { label: "Children", value: children, min: 0, max: suite.maxGuests, set: setChildren },
+          { label: "Suites", value: rooms, min: 1, max: suite.maxRooms, set: setRooms },
+          { label: "Adults", value: adults, min: 1, max: maxGuestsAllowed, set: setAdults },
+          { label: "Children", value: children, min: 0, max: maxGuestsAllowed, set: setChildren },
         ].map((row) => (
           <div key={row.label} className="booking-stepper">
             <span>{row.label}</span>
             <div className="booking-stepper-controls">
-              <button type="button" aria-label={`Decrease ${row.label}`} onClick={() => bump(row.set, row.value, row.min, row.max, -1)}>
+              <button
+                type="button"
+                aria-label={`Decrease ${row.label}`}
+                disabled={row.value <= row.min}
+                onClick={() => bump(row.set, row.value, row.min, row.max, -1)}
+              >
                 –
               </button>
               <strong>{row.value}</strong>
-              <button type="button" aria-label={`Increase ${row.label}`} onClick={() => bump(row.set, row.value, row.min, row.max, 1)}>
+              <button
+                type="button"
+                aria-label={`Increase ${row.label}`}
+                disabled={row.value >= row.max}
+                onClick={() => bump(row.set, row.value, row.min, row.max, 1)}
+              >
                 +
               </button>
             </div>
@@ -122,18 +142,19 @@ export default function BookingWidget({ suite }: Props) {
       <div className="booking-rate-box">
         <div className="booking-rate-head">
           <div>
-            <strong>Standard</strong>
+            <strong>Standard rate</strong>
             <ul>
               <li>Minimum 1-night stay</li>
-              <li>Non-refundable</li>
-              <li>Without Breakfast</li>
+              <li>Non-refundable stay total</li>
+              <li>Without breakfast</li>
             </ul>
           </div>
           <div className="booking-rate-amount">
-            <span>Rate details</span>
+            <span>Stay total</span>
             <strong>{formatNaira(stayTotal)}</strong>
             <small>
-              ({nights} {nights === 1 ? "night" : "nights"}, {rooms} {rooms === 1 ? "room" : "rooms"})
+              {Math.max(nights, 1)} {Math.max(nights, 1) === 1 ? "night" : "nights"} · {rooms}{" "}
+              {rooms === 1 ? "suite" : "suites"}
             </small>
           </div>
         </div>
@@ -141,10 +162,12 @@ export default function BookingWidget({ suite }: Props) {
 
       <div className="booking-caution">
         <div>
-          <strong>Refundable Caution Fee</strong>
-          <p>This fee is fully refundable at checkout if no damage is found in the apartment</p>
+          <strong>Refundable caution fee</strong>
+          <p>
+            {formatNaira(suite.cautionFee)} per suite · fully refundable if no damage is found.
+          </p>
         </div>
-        <strong>{formatNaira(suite.cautionFee)}</strong>
+        <strong>{formatNaira(cautionTotal)}</strong>
       </div>
 
       <div className="booking-total">
@@ -152,7 +175,14 @@ export default function BookingWidget({ suite }: Props) {
         <strong>{formatNaira(grandTotal)}</strong>
       </div>
 
-      <Link href={checkoutHref} className="btn btn-primary booking-cta">
+      {error ? <p className="form-error">{error}</p> : null}
+
+      <Link
+        href={checkoutHref}
+        className={canContinue ? "btn btn-primary booking-cta" : "btn btn-primary booking-cta is-disabled"}
+        aria-disabled={!canContinue}
+        onClick={handleContinue}
+      >
         Continue to checkout
       </Link>
     </aside>

@@ -113,8 +113,8 @@ export default function Home() {
         </div>
       </HomeHeroCarousel>
 
-      <section style={{ backgroundColor: "var(--color-surface)", padding: "var(--spacing-3xl) 0" }}>
-        <div className="container grid grid-cols-2 gap-xl items-center">
+      <section className="section-pad" style={{ backgroundColor: "var(--color-surface)" }}>
+        <div className="container book-wide grid grid-cols-2 gap-xl items-center">
           <div
             className="home-media"
             style={{
@@ -124,10 +124,10 @@ export default function Home() {
 
           <div>
             <p className="eyebrow">Features</p>
-            <h2 style={{ fontSize: "2.6rem", color: "var(--color-brand-green)", marginBottom: "var(--spacing-md)" }}>
+            <h2 style={{ fontSize: "clamp(2rem, 4vw, 2.6rem)", color: "var(--color-brand-green)", marginBottom: "var(--spacing-md)" }}>
               Ready to book your stay?
             </h2>
-            <p>
+            <p style={{ lineHeight: 1.7, maxWidth: "38rem" }}>
               Looking for hotels in Ilaro? Discover your perfect short-stay apartment in Ilaro, Ogun State. Our fully
               furnished, private ensuite apartments are designed for travelers, professionals, and local guests who want
               the luxury of a hotel in Ilaro and the comfort of home — all in one place. Located in the heart of Ogun
@@ -135,28 +135,15 @@ export default function Home() {
               affordable luxury with flexible booking options and exceptional comfort that feels just like home.
             </p>
 
-            <div className="grid grid-cols-2 gap-sm" style={{ margin: "var(--spacing-xl) 0" }}>
+            <div className="home-feature-chips">
               {features.map(([icon, label]) => (
-                <div
-                  key={label}
-                  style={{
-                    backgroundColor: "var(--color-surface-alt)",
-                    padding: "12px 16px",
-                    borderRadius: "10px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
-                    fontSize: "0.88rem",
-                    fontWeight: 600,
-                    color: "var(--color-text)",
-                  }}
-                >
-                  <span>{icon}</span> {label}
+                <div key={label} className="home-feature-chip">
+                  <span aria-hidden>{icon}</span> {label}
                 </div>
               ))}
             </div>
 
-            <div className="flex items-center gap-md">
+            <div className="flex items-center gap-md" style={{ marginTop: "var(--spacing-lg)" }}>
               <span style={{ fontSize: "2.6rem", fontWeight: 700, color: "var(--color-text)", lineHeight: 1 }}>4.9</span>
               <div>
                 <div style={{ color: "var(--color-primary-dark)", fontSize: "1.1rem" }}>★★★★★</div>
@@ -168,10 +155,10 @@ export default function Home() {
       </section>
 
       <section className="section-pad" style={{ backgroundColor: "var(--color-brand-green)" }}>
-        <div className="container">
+        <div className="container book-wide">
           <div
             className="flex justify-between items-center"
-            style={{ marginBottom: "var(--spacing-2xl)", gap: "var(--spacing-lg)", flexWrap: "wrap" }}
+            style={{ marginBottom: "clamp(1.75rem, 4vw, 2.75rem)", gap: "var(--spacing-lg)", flexWrap: "wrap" }}
           >
             <div>
               <p className="eyebrow" style={{ color: "var(--color-primary)" }}>
@@ -293,17 +280,17 @@ export default function Home() {
         </div>
       </section>
 
-      <section style={{ backgroundColor: "var(--color-surface)", padding: "var(--spacing-3xl) 0" }}>
-        <div className="container">
-          <div style={{ textAlign: "center", marginBottom: "var(--spacing-2xl)" }}>
+      <section className="section-pad" style={{ backgroundColor: "var(--color-surface)" }}>
+        <div className="container book-wide">
+          <div style={{ textAlign: "center", marginBottom: "clamp(1.75rem, 4vw, 2.75rem)" }}>
             <p className="eyebrow">O&apos;apartment</p>
             <h2>
               Our <span style={{ color: "var(--color-primary-dark)" }}>facilities</span>
             </h2>
-            <p>Indulge in modern comforts designed to elevate your stay!</p>
+            <p>Indulge in modern comforts designed to elevate your stay.</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-lg">
+          <div className="grid grid-cols-2 gap-xl">
             {[
               {
                 title: "Fully furnished rooms",
@@ -330,24 +317,15 @@ export default function Home() {
                 image: apt.bathroom1,
               },
             ].map((item) => (
-              <div key={item.title} className="card" style={{ padding: "var(--spacing-lg)" }}>
-                <h3 style={{ marginBottom: "var(--spacing-md)" }}>{item.title}</h3>
-                <div
-                  style={{
-                    height: "200px",
-                    backgroundImage: `url(${item.image})`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                    borderRadius: "var(--radius-md)",
-                    marginBottom: "var(--spacing-md)",
-                  }}
-                />
-                <p style={{ margin: 0, color: "var(--color-text)" }}>{item.copy}</p>
+              <div key={item.title} className="card home-facility-card">
+                <h3>{item.title}</h3>
+                <div className="home-facility-image" style={{ backgroundImage: `url(${item.image})` }} />
+                <p>{item.copy}</p>
               </div>
             ))}
           </div>
 
-          <div className="flex justify-center" style={{ marginTop: "var(--spacing-2xl)" }}>
+          <div className="flex justify-center" style={{ marginTop: "clamp(1.75rem, 4vw, 2.75rem)" }}>
             <Link href="/amenities" className="btn btn-primary">
               Our amenities
             </Link>
@@ -356,16 +334,16 @@ export default function Home() {
       </section>
 
       <section className="section-pad" style={{ backgroundColor: "var(--color-primary-light)" }}>
-        <div className="container">
-          <div style={{ textAlign: "center", marginBottom: "var(--spacing-2xl)" }}>
+        <div className="container book-wide">
+          <div style={{ textAlign: "center", marginBottom: "clamp(1.75rem, 4vw, 2.75rem)" }}>
             <p className="eyebrow">Client Testimonials</p>
             <h2 style={{ margin: 0 }}>Our Customers Feedback</h2>
-            <p>Our guests checked in, checked out, and had plenty to say!</p>
+            <p>Our guests checked in, checked out, and had plenty to say.</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-lg">
+          <div className="grid grid-cols-2 gap-xl">
             {testimonials.map((item) => (
-              <div key={item.name} className="card" style={{ padding: "var(--spacing-xl)" }}>
+              <div key={item.name} className="card home-testimonial-card">
                 <p>“{item.quote}”</p>
                 <div style={{ color: "var(--color-primary-dark)", marginBottom: "var(--spacing-sm)" }}>★★★★★</div>
                 <h4 style={{ margin: 0 }}>{item.name}</h4>

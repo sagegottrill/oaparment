@@ -22,7 +22,7 @@ export const suites: SuiteProduct[] = [
     pricePerNight: 150000,
     cautionFee: 50000,
     maxGuests: 6,
-    maxRooms: 1,
+    maxRooms: 2,
     images: [apt.living7, apt.parking1, apt.kitchen2, apt.bedroom10, apt.living5, apt.bathroom1, apt.bedroom1, apt.dining1],
     description: `Welcome to Unit A at The O’ Apartments, your premier destination for luxury living in the heart of Ilaro. Whether you are visiting for business, a family getaway, or a peaceful retreat, this expansive 3-bedroom premium suite is meticulously designed to offer maximum comfort and uninterrupted tranquility.
 
@@ -56,7 +56,7 @@ Each of the three spacious bedrooms is a private sanctuary, complete with premiu
     pricePerNight: 150000,
     cautionFee: 50000,
     maxGuests: 6,
-    maxRooms: 1,
+    maxRooms: 2,
     images: [apt.bedroom10, apt.living5, apt.kitchen1, apt.bathroom2, apt.living7, apt.parking2, apt.bedroom3, apt.dining2],
     description: `Welcome to Unit B at The O’ Apartments — a matching 3-bedroom premium suite designed for guests who want hotel-grade comfort with the privacy of home in Ilaro.
 
@@ -83,10 +83,22 @@ Enjoy an open living space, fully fitted kitchen, Smart TV entertainment, and th
   },
 ];
 
-export function getSuite(id: string) {
-  return suites.find((suite) => suite.id === id || suite.slug === id) ?? suites[0];
+export function getSuite(id: string): SuiteProduct | null {
+  return suites.find((suite) => suite.id === id || suite.slug === id) ?? null;
+}
+
+export function requireSuite(id: string): SuiteProduct {
+  return getSuite(id) ?? suites[0];
 }
 
 export function formatNaira(amount: number) {
   return `₦${amount.toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+export function nightsBetween(checkIn: string, checkOut: string) {
+  const start = new Date(`${checkIn}T12:00:00`);
+  const end = new Date(`${checkOut}T12:00:00`);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return 0;
+  const diff = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+  return Math.max(diff, 0);
 }

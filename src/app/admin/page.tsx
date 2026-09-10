@@ -31,76 +31,63 @@ export default async function AdminDashboardPage() {
 
   return (
     <div>
-      <h1 style={{ marginBottom: "var(--spacing-xl)" }}>Dashboard Overview</h1>
+      <div className="admin-page-head">
+        <h1>Dashboard</h1>
+        <Link href="/admin/bookings" className="btn btn-outline btn-compact">
+          Manage bookings
+        </Link>
+      </div>
 
       <div className="grid grid-cols-3 gap-md" style={{ marginBottom: "var(--spacing-2xl)" }}>
-        <div className="card" style={{ padding: "var(--spacing-md)" }}>
-          <h3 style={{ fontSize: "1rem", color: "var(--color-text-muted)" }}>Total Bookings</h3>
-          <p style={{ fontSize: "2rem", fontWeight: 700, margin: "var(--spacing-xs) 0 0 0" }}>
-            {totalBookings ?? 0}
-          </p>
+        <div className="card admin-stat">
+          <h3>Total bookings</h3>
+          <p>{totalBookings ?? 0}</p>
         </div>
-        <div className="card" style={{ padding: "var(--spacing-md)" }}>
-          <h3 style={{ fontSize: "1rem", color: "var(--color-text-muted)" }}>Revenue (MTD)</h3>
-          <p style={{ fontSize: "2rem", fontWeight: 700, margin: "var(--spacing-xs) 0 0 0" }}>
-            {formatNaira(revenueMtd)}
-          </p>
+        <div className="card admin-stat">
+          <h3>Revenue (MTD)</h3>
+          <p>{formatNaira(revenueMtd)}</p>
         </div>
-        <div className="card" style={{ padding: "var(--spacing-md)" }}>
-          <h3 style={{ fontSize: "1rem", color: "var(--color-text-muted)" }}>Active Suites</h3>
-          <p style={{ fontSize: "2rem", fontWeight: 700, margin: "var(--spacing-xs) 0 0 0" }}>
-            {activeSuites}
-          </p>
+        <div className="card admin-stat">
+          <h3>Active suites</h3>
+          <p>{activeSuites}</p>
         </div>
       </div>
 
-      <div className="card" style={{ padding: "var(--spacing-lg)" }}>
-        <div className="flex justify-between items-center gap-md" style={{ marginBottom: "var(--spacing-md)", flexWrap: "wrap" }}>
-          <h2 style={{ margin: 0 }}>Recent Bookings</h2>
-          <Link href="/admin/bookings" className="btn btn-outline">
-            View all
-          </Link>
+      <div className="card admin-panel">
+        <div className="admin-page-head" style={{ marginBottom: "var(--spacing-md)" }}>
+          <h2 style={{ margin: 0 }}>Recent bookings</h2>
         </div>
         <div className="table-wrap">
-          <table style={{ width: "100%", textAlign: "left", borderCollapse: "collapse" }}>
+          <table className="data-table">
             <thead>
-              <tr style={{ borderBottom: "1px solid var(--color-border)" }}>
-                <th style={{ padding: "var(--spacing-sm)" }}>Guest</th>
-                <th style={{ padding: "var(--spacing-sm)" }}>Room</th>
-                <th style={{ padding: "var(--spacing-sm)" }}>Dates</th>
-                <th style={{ padding: "var(--spacing-sm)" }}>Amount</th>
-                <th style={{ padding: "var(--spacing-sm)" }}>Status</th>
+              <tr>
+                <th>Guest</th>
+                <th>Room</th>
+                <th>Dates</th>
+                <th>Amount</th>
+                <th>Status</th>
               </tr>
             </thead>
             <tbody>
               {(bookings ?? []).length === 0 ? (
                 <tr>
-                  <td colSpan={5} style={{ padding: "var(--spacing-sm)" }}>
-                    No bookings yet.
+                  <td colSpan={5}>
+                    No bookings yet. When guests pay with Flutterwave, they appear here.
                   </td>
                 </tr>
               ) : (
                 (bookings ?? []).map((booking) => (
-                  <tr key={booking.id} style={{ borderBottom: "1px solid var(--color-border)" }}>
-                    <td style={{ padding: "var(--spacing-sm)" }}>{booking.guest_name}</td>
-                    <td style={{ padding: "var(--spacing-sm)" }}>{getSuite(booking.suite_id).title}</td>
-                    <td style={{ padding: "var(--spacing-sm)" }}>
+                  <tr key={booking.id}>
+                    <td>{booking.guest_name}</td>
+                    <td>{getSuite(booking.suite_id)?.title ?? booking.suite_id}</td>
+                    <td>
                       {booking.check_in} – {booking.check_out}
                     </td>
-                    <td style={{ padding: "var(--spacing-sm)" }}>{formatNaira(Number(booking.total))}</td>
-                    <td style={{ padding: "var(--spacing-sm)" }}>
-                      <span
-                        style={{
-                          color:
-                            booking.status === "confirmed"
-                              ? "var(--color-success)"
-                              : booking.status === "pending"
-                                ? "#F59E0B"
-                                : "var(--color-error)",
-                        }}
-                      >
-                        {booking.status} / {booking.payment_status}
-                      </span>
+                    <td>{formatNaira(Number(booking.total))}</td>
+                    <td>
+                      <span className={`status-pill status-${booking.status}`}>{booking.status}</span>
+                      <br />
+                      <small>{booking.payment_status}</small>
                     </td>
                   </tr>
                 ))

@@ -17,7 +17,6 @@ const links = [
   { href: "/blog", label: "Our Blog" },
   { href: "/faq", label: "FAQ" },
   { href: "/contact-us", label: "Contact Us" },
-  { href: "/my-account", label: "My account" },
 ];
 
 export default function Navbar() {

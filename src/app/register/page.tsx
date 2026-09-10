@@ -11,17 +11,26 @@ export default function RegisterPage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [notice, setNotice] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
     setNotice("");
+    setError("");
+
+    if (password !== confirm) {
+      setError("Passwords do not match.");
+      setLoading(false);
+      return;
+    }
 
     try {
       const supabase = createClient();
-      const { data, error } = await supabase.auth.signUp({
+      const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -31,27 +40,25 @@ export default function RegisterPage() {
         },
       });
 
-      if (error) {
-        setNotice(error.message);
+      if (signUpError) {
+        setError(signUpError.message);
         return;
       }
 
       if (data.user) {
-        await supabase
-          .from("profiles")
-          .update({ full_name: fullName })
-          .eq("id", data.user.id);
+        await supabase.from("profiles").update({ full_name: fullName }).eq("id", data.user.id);
       }
 
       if (data.session) {
+        await fetch("/api/auth/bootstrap", { method: "POST" });
         router.replace("/my-account");
         router.refresh();
         return;
       }
 
       setNotice("Account created. Check your email to confirm, then sign in.");
-    } catch (error) {
-      setNotice(error instanceof Error ? error.message : "Registration failed");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Registration failed");
     } finally {
       setLoading(false);
     }
@@ -60,12 +67,16 @@ export default function RegisterPage() {
   return (
     <main className="auth-screen">
       <div className="auth-card">
-        <Link href="/" aria-label="The O' Apartments home" style={{ display: "inline-block", marginBottom: "var(--spacing-md)" }}>
-          <Image src="/logo.png" alt="The O' Apartments" width={200} height={52} className="brand-logo" priority />
+        <Link
+          href="/"
+          aria-label="The O' Apartments home"
+          style={{ display: "inline-block", marginBottom: "var(--spacing-md)" }}
+        >
+          <Image src="/logo.png" alt="The O' Apartments" width={220} height={56} className="brand-logo" priority />
         </Link>
         <p className="eyebrow">Create account</p>
         <h1>Join The O&apos; Apartments</h1>
-        <p>Save stays, complete checkout faster, and view your booking history.</p>
+        <p>Save stays, checkout faster, and view your booking history.</p>
 
         <form onSubmit={handleSubmit} className="auth-form">
           <label>
@@ -102,12 +113,29 @@ export default function RegisterPage() {
               placeholder="At least 6 characters"
             />
           </label>
+          <label>
+            Confirm password
+            <input
+              className="input"
+              type="password"
+              required
+              minLength={6}
+              value={confirm}
+              onChange={(event) => setConfirm(event.target.value)}
+              placeholder="Repeat password"
+            />
+          </label>
           <button className="btn btn-primary" type="submit" disabled={loading}>
             {loading ? "Creating…" : "Create account"}
           </button>
         </form>
 
-        {notice ? <p className="form-notice">{notice}</p> : null}
+        {error ? <p className="form-error">{error}</p> : null}
+        {notice ? (
+          <p className="form-success">
+            {notice} <Link href="/login">Sign in</Link>
+          </p>
+        ) : null}
 
         <p className="auth-footer">
           Already have an account? <Link href="/login">Sign in</Link>

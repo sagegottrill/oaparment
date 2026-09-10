@@ -13,6 +13,13 @@ export async function updateSession(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
   if (!url || !key) {
+    if (request.nextUrl.pathname.startsWith("/admin")) {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/login";
+      redirectUrl.searchParams.set("next", request.nextUrl.pathname);
+      redirectUrl.searchParams.set("error", "auth_not_configured");
+      return NextResponse.redirect(redirectUrl);
+    }
     return supabaseResponse;
   }
 

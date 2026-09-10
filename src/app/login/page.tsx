@@ -14,18 +14,35 @@ function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [notice, setNotice] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [mode, setMode] = useState<"signin" | "reset">("signin");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
     setNotice("");
+    setError("");
 
     try {
       const supabase = createClient();
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
-        setNotice(error.message);
+
+      if (mode === "reset") {
+        const origin = window.location.origin;
+        const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${origin}/login`,
+        });
+        if (resetError) {
+          setError(resetError.message);
+          return;
+        }
+        setNotice("Password reset email sent. Check your inbox.");
+        return;
+      }
+
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInError) {
+        setError(signInError.message);
         return;
       }
 
@@ -51,8 +68,8 @@ function LoginForm() {
 
       router.replace(next.startsWith("/") ? next : "/my-account");
       router.refresh();
-    } catch (error) {
-      setNotice(error instanceof Error ? error.message : "Sign-in failed");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Sign-in failed");
     } finally {
       setLoading(false);
     }
@@ -61,12 +78,20 @@ function LoginForm() {
   return (
     <main className="auth-screen">
       <div className="auth-card">
-        <Link href="/" aria-label="The O' Apartments home" style={{ display: "inline-block", marginBottom: "var(--spacing-md)" }}>
-          <Image src="/logo.png" alt="The O' Apartments" width={200} height={52} className="brand-logo" priority />
+        <Link
+          href="/"
+          aria-label="The O' Apartments home"
+          style={{ display: "inline-block", marginBottom: "var(--spacing-md)" }}
+        >
+          <Image src="/logo.png" alt="The O' Apartments" width={220} height={56} className="brand-logo" priority />
         </Link>
-        <p className="eyebrow">Guest access</p>
-        <h1>Welcome back</h1>
-        <p>Sign in to manage bookings, invoices, and your stay details.</p>
+        <p className="eyebrow">{mode === "signin" ? "Guest access" : "Reset password"}</p>
+        <h1>{mode === "signin" ? "Welcome back" : "Forgot password"}</h1>
+        <p>
+          {mode === "signin"
+            ? "Sign in to manage bookings and complete checkout faster."
+            : "Enter your email and we’ll send a reset link."}
+        </p>
 
         <form onSubmit={handleSubmit} className="auth-form">
           <label>
@@ -80,29 +105,42 @@ function LoginForm() {
               placeholder="you@email.com"
             />
           </label>
-          <label>
-            Password
-            <input
-              className="input"
-              type="password"
-              required
-              minLength={6}
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              placeholder="Your password"
-            />
-          </label>
+          {mode === "signin" ? (
+            <label>
+              Password
+              <input
+                className="input"
+                type="password"
+                required
+                minLength={6}
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="Your password"
+              />
+            </label>
+          ) : null}
           <button className="btn btn-primary" type="submit" disabled={loading}>
-            {loading ? "Signing in…" : "Sign in"}
+            {loading ? "Please wait…" : mode === "signin" ? "Sign in" : "Send reset link"}
           </button>
         </form>
 
-        {notice ? <p className="form-notice">{notice}</p> : null}
+        {error ? <p className="form-error">{error}</p> : null}
+        {notice ? <p className="form-success">{notice}</p> : null}
 
         <p className="auth-footer">
-          New guest? <Link href="/register">Create an account</Link>
-          <br />
-          Staff? <Link href="/admin">Admin dashboard</Link>
+          {mode === "signin" ? (
+            <>
+              <button type="button" className="linkish" onClick={() => setMode("reset")}>
+                Forgot password?
+              </button>
+              <br />
+              New guest? <Link href="/register">Create an account</Link>
+            </>
+          ) : (
+            <button type="button" className="linkish" onClick={() => setMode("signin")}>
+              Back to sign in
+            </button>
+          )}
         </p>
       </div>
     </main>
@@ -111,7 +149,15 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<main className="auth-screen"><div className="auth-card"><p>Loading…</p></div></main>}>
+    <Suspense
+      fallback={
+        <main className="auth-screen">
+          <div className="auth-card">
+            <p>Loading…</p>
+          </div>
+        </main>
+      }
+    >
       <LoginForm />
     </Suspense>
   );

@@ -23,3 +23,16 @@ export function getAppUrl() {
     "http://localhost:3000"
   );
 }
+
+/** Flutterwave must fetch this URL from the public internet — localhost logos always break. */
+export function getFlutterwaveLogoUrl() {
+  const override = process.env.FLUTTERWAVE_LOGO_URL?.trim();
+  if (override) return override;
+
+  const base = getAppUrl().replace(/\/$/, "");
+  const isLocal = /localhost|127\.0\.0\.1/i.test(base);
+  const isHttps = /^https:\/\//i.test(base);
+  if (!isHttps || isLocal) return undefined;
+
+  return `${base}/logo-mark.png`;
+}

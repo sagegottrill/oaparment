@@ -1,34 +1,100 @@
+"use client";
+
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { FormEvent, useEffect, useState, useTransition } from "react";
+import { createClient } from "@/lib/supabase/client";
+import type { Booking } from "@/lib/supabase/types";
 import { formatNaira, getSuite } from "@/lib/suites";
-import { createClient } from "@/lib/supabase/server";
 
-export default async function MyAccountPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ error?: string }>;
-}) {
-  const params = await searchParams;
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+function statusLabel(status: string, payment: string) {
+  if (payment === "paid" && status === "confirmed") return "Confirmed & paid";
+  if (payment === "pending") return "Awaiting payment";
+  if (payment === "failed") return "Payment failed";
+  return `${status} / ${payment}`;
+}
 
-  if (!user) {
-    redirect("/login?next=/my-account");
+export default function MyAccountPage() {
+  const [loading, setLoading] = useState(true);
+  const [email, setEmail] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [role, setRole] = useState("guest");
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [pending, startTransition] = useTransition();
+
+  async function load() {
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      window.location.href = "/login?next=/my-account";
+      return;
+    }
+
+    setEmail(user.email ?? "");
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("full_name, phone, role")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    setFullName(profile?.full_name ?? "");
+    setPhone(profile?.phone ?? "");
+    setRole(profile?.role ?? "guest");
+
+    const { data } = await supabase
+      .from("bookings")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+
+    setBookings(data ?? []);
+    setLoading(false);
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name, role, phone")
-    .eq("id", user.id)
-    .maybeSingle();
+  useEffect(() => {
+    void load();
+  }, []);
 
-  const { data: bookings } = await supabase
-    .from("bookings")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false });
+  function saveProfile(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    startTransition(async () => {
+      setMessage("");
+      setError("");
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({
+          full_name: fullName,
+          phone,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", user.id);
+
+      if (updateError) {
+        setError(updateError.message);
+        return;
+      }
+      setMessage("Profile saved.");
+    });
+  }
+
+  if (loading) {
+    return (
+      <main className="container section-pad">
+        <p>Loading your account…</p>
+      </main>
+    );
+  }
 
   return (
     <main>
@@ -37,46 +103,61 @@ export default async function MyAccountPage({
           <p className="eyebrow">Your stay</p>
           <h1>My account</h1>
           <p>
-            Signed in as {profile?.full_name || user.email}
-            {profile?.role === "admin" ? " · Admin" : ""}
+            Signed in as {fullName || email}
+            {role === "admin" ? " · Admin" : ""}
           </p>
         </div>
       </section>
 
       <section className="container section-pad">
-        {params.error === "admin_required" ? (
-          <p className="form-notice" style={{ marginBottom: "var(--spacing-md)" }}>
-            That area is for staff accounts only.
-          </p>
-        ) : null}
-
         <div className="account-grid">
           <div className="card account-panel">
+            <h2>Profile</h2>
+            <form className="auth-form" onSubmit={saveProfile}>
+              <label>
+                Full name
+                <input className="input" value={fullName} onChange={(e) => setFullName(e.target.value)} />
+              </label>
+              <label>
+                Email
+                <input className="input" value={email} disabled />
+              </label>
+              <label>
+                Phone
+                <input className="input" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="080..." />
+              </label>
+              <button className="btn btn-primary" type="submit" disabled={pending}>
+                {pending ? "Saving…" : "Save profile"}
+              </button>
+            </form>
+            {error ? <p className="form-error">{error}</p> : null}
+            {message ? <p className="form-success">{message}</p> : null}
+          </div>
+
+          <div className="card account-panel">
             <h2>Your bookings</h2>
-            {!bookings?.length ? (
+            {!bookings.length ? (
               <p>No bookings yet. Book a suite and pay with Flutterwave to see it here.</p>
             ) : (
               <div className="table-wrap">
-                <table style={{ width: "100%", textAlign: "left", borderCollapse: "collapse" }}>
+                <table className="data-table">
                   <thead>
-                    <tr style={{ borderBottom: "1px solid var(--color-border)" }}>
-                      <th style={{ padding: "var(--spacing-sm)" }}>Suite</th>
-                      <th style={{ padding: "var(--spacing-sm)" }}>Dates</th>
-                      <th style={{ padding: "var(--spacing-sm)" }}>Total</th>
-                      <th style={{ padding: "var(--spacing-sm)" }}>Status</th>
+                    <tr>
+                      <th>Suite</th>
+                      <th>Dates</th>
+                      <th>Total</th>
+                      <th>Status</th>
                     </tr>
                   </thead>
                   <tbody>
                     {bookings.map((booking) => (
-                      <tr key={booking.id} style={{ borderBottom: "1px solid var(--color-border)" }}>
-                        <td style={{ padding: "var(--spacing-sm)" }}>{getSuite(booking.suite_id).title}</td>
-                        <td style={{ padding: "var(--spacing-sm)" }}>
+                      <tr key={booking.id}>
+                        <td>{getSuite(booking.suite_id)?.title ?? booking.suite_id}</td>
+                        <td>
                           {booking.check_in} → {booking.check_out}
                         </td>
-                        <td style={{ padding: "var(--spacing-sm)" }}>{formatNaira(Number(booking.total))}</td>
-                        <td style={{ padding: "var(--spacing-sm)" }}>
-                          {booking.status} / {booking.payment_status}
-                        </td>
+                        <td>{formatNaira(Number(booking.total))}</td>
+                        <td>{statusLabel(booking.status, booking.payment_status)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -84,10 +165,10 @@ export default async function MyAccountPage({
               </div>
             )}
             <div className="flex gap-md" style={{ flexWrap: "wrap", marginTop: "var(--spacing-md)" }}>
-              <Link href="/rooms/unit-a" className="btn btn-primary">
+              <Link href="/book" className="btn btn-primary">
                 Book again
               </Link>
-              {profile?.role === "admin" ? (
+              {role === "admin" ? (
                 <Link href="/admin" className="btn btn-outline">
                   Admin dashboard
                 </Link>
@@ -98,18 +179,6 @@ export default async function MyAccountPage({
                 </button>
               </form>
             </div>
-          </div>
-
-          <div className="card account-panel">
-            <h2>Need help now?</h2>
-            <p>Call or message the front desk for same-day bookings in Ilaro.</p>
-            <p>
-              <a href="tel:08075963676">08075963676</a>
-              <br />
-              <a href="https://wa.link/ubsow7" target="_blank" rel="noopener noreferrer">
-                WhatsApp booking
-              </a>
-            </p>
           </div>
         </div>
       </section>

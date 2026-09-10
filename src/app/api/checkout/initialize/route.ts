@@ -1,28 +1,24 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getAppUrl, getFlutterwaveLogoUrl } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
+import { assertStayAvailable, loadCheckoutSuite } from "@/lib/checkout-suite";
 import { initializeFlutterwavePayment } from "@/lib/flutterwave";
-import { getSuite } from "@/lib/suites";
-
-function appUrl() {
-  return (
-    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ||
-    process.env.VERCEL_URL?.replace(/\/$/, "")?.replace(/^/, "https://") ||
-    "http://localhost:3000"
-  );
-}
+import { nightsBetween } from "@/lib/suites";
 
 function makeTxRef() {
   return `OA-${Date.now()}-${Math.random().toString(36).slice(2, 10).toUpperCase()}`;
 }
 
 export async function POST(request: Request) {
+  let bookingId: string | null = null;
+  let admin: ReturnType<typeof createAdminClient> | null = null;
+
   try {
     const body = (await request.json()) as {
       suiteId?: string;
       checkIn?: string;
       checkOut?: string;
-      nights?: number;
       rooms?: number;
       adults?: number;
       children?: number;
@@ -32,37 +28,6 @@ export async function POST(request: Request) {
       notes?: string;
     };
 
-    const suiteId = body.suiteId ?? "unit-a";
-    const suite = getSuite(suiteId);
-    const checkIn = body.checkIn;
-    const checkOut = body.checkOut;
-    const nights = Number(body.nights ?? 0);
-    const rooms = Math.max(1, Number(body.rooms ?? 1));
-    const adults = Math.max(1, Number(body.adults ?? 1));
-    const children = Math.max(0, Number(body.children ?? 0));
-    const guestName = (body.guestName ?? "").trim();
-    const guestEmail = (body.guestEmail ?? "").trim().toLowerCase();
-    const guestPhone = (body.guestPhone ?? "").trim();
-    const notes = (body.notes ?? "").trim() || null;
-
-    if (!checkIn || !checkOut || nights < 1) {
-      return NextResponse.json({ error: "Valid check-in, check-out, and nights are required." }, { status: 400 });
-    }
-    if (!guestName || !guestEmail || !guestPhone) {
-      return NextResponse.json({ error: "Guest name, email, and phone are required." }, { status: 400 });
-    }
-
-    const stayTotal = suite.pricePerNight * nights * rooms;
-    const cautionFee = suite.cautionFee;
-    const total = stayTotal + cautionFee;
-    const txRef = makeTxRef();
-
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    let admin;
     try {
       admin = createAdminClient();
     } catch {
@@ -74,6 +39,59 @@ export async function POST(request: Request) {
         { status: 500 }
       );
     }
+
+    const loaded = await loadCheckoutSuite(admin, body.suiteId ?? "");
+    if ("error" in loaded) {
+      return NextResponse.json({ error: loaded.error }, { status: 400 });
+    }
+    const suite = loaded.suite;
+
+    const checkIn = body.checkIn;
+    const checkOut = body.checkOut;
+    const nights = checkIn && checkOut ? nightsBetween(checkIn, checkOut) : 0;
+    const rooms = Math.min(suite.maxRooms, Math.max(1, Number(body.rooms ?? 1)));
+    const adults = Math.max(1, Number(body.adults ?? 1));
+    const children = Math.max(0, Number(body.children ?? 0));
+    const guestName = (body.guestName ?? "").trim();
+    const guestEmail = (body.guestEmail ?? "").trim().toLowerCase();
+    const guestPhone = (body.guestPhone ?? "").trim();
+    const notes = (body.notes ?? "").trim() || null;
+
+    if (!checkIn || !checkOut || nights < 1) {
+      return NextResponse.json(
+        { error: "Valid check-in and check-out dates are required (minimum 1 night)." },
+        { status: 400 }
+      );
+    }
+    if (!guestName || !guestEmail || !guestPhone) {
+      return NextResponse.json({ error: "Guest name, email, and phone are required." }, { status: 400 });
+    }
+    if (adults + children > suite.maxGuests * rooms) {
+      return NextResponse.json(
+        { error: `With ${rooms} suite(s), this stay allows up to ${suite.maxGuests * rooms} guests.` },
+        { status: 400 }
+      );
+    }
+
+    const conflict = await assertStayAvailable(admin, {
+      suiteId: suite.id,
+      rooms,
+      checkIn,
+      checkOut,
+    });
+    if (conflict) {
+      return NextResponse.json({ error: conflict }, { status: 409 });
+    }
+
+    const stayTotal = suite.pricePerNight * nights * rooms;
+    const cautionFee = suite.cautionFee * rooms;
+    const total = stayTotal + cautionFee;
+    const txRef = makeTxRef();
+
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     const { data: booking, error: bookingError } = await admin
       .from("bookings")
@@ -107,10 +125,13 @@ export async function POST(request: Request) {
       );
     }
 
+    bookingId = booking.id;
+
+    const logo = getFlutterwaveLogoUrl();
     const payment = await initializeFlutterwavePayment({
       txRef,
       amount: total,
-      redirectUrl: `${appUrl()}/checkout/success`,
+      redirectUrl: `${getAppUrl().replace(/\/$/, "")}/checkout/success`,
       customer: {
         email: guestEmail,
         name: guestName,
@@ -121,9 +142,12 @@ export async function POST(request: Request) {
         suite_id: suite.id,
       },
       customizations: {
-        title: "The O' Apartments",
-        description: `${suite.title} · ${nights} night(s)`,
-        logo: `${appUrl()}/logo.png`,
+        title: "The O Apartments",
+        description:
+          rooms >= 2
+            ? `Unit A + Unit B · ${nights} night(s)`
+            : `${suite.title} · ${nights} night(s)`,
+        ...(logo ? { logo } : {}),
       },
     });
 
@@ -131,8 +155,19 @@ export async function POST(request: Request) {
       bookingId: booking.id,
       txRef,
       paymentLink: payment.link,
+      total,
+      nights,
     });
   } catch (error) {
+    if (admin && bookingId) {
+      await admin
+        .from("bookings")
+        .update({
+          payment_status: "failed",
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", bookingId);
+    }
     const message = error instanceof Error ? error.message : "Checkout failed";
     return NextResponse.json({ error: message }, { status: 500 });
   }

@@ -35,7 +35,11 @@ function SuccessContent() {
 
     async function verify() {
       if (!transactionId) {
-        setError("Missing transaction details from Flutterwave.");
+        if (status === "cancelled" || status === "failed") {
+          setError("Payment was cancelled. You can try again anytime.");
+        } else {
+          setError("Missing transaction details from Flutterwave.");
+        }
         setLoading(false);
         return;
       }

@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { FormEvent, useState } from "react";
 import LocationMap from "@/components/LocationMap";
+import { BOOK_NOW_HREF } from "@/lib/booking";
 
 export default function ContactUsPage() {
   const [notice, setNotice] = useState("");
@@ -18,7 +20,7 @@ export default function ContactUsPage() {
   }
 
   return (
-    <main>
+    <main className="page-shell">
       <section className="page-hero">
         <div className="container">
           <p className="eyebrow">Talk to us</p>
@@ -27,8 +29,8 @@ export default function ContactUsPage() {
         </div>
       </section>
 
-      <section className="container section-pad">
-        <div className="account-grid">
+      <section className="container book-wide section-pad">
+        <div className="account-grid contact-grid">
           <div className="card account-panel">
             <h2>Visit</h2>
             <p>
@@ -46,9 +48,15 @@ export default function ContactUsPage() {
             <p>
               <a href="mailto:info@oapartment.com">info@oapartment.com</a>
             </p>
+            <Link href={BOOK_NOW_HREF} className="btn btn-primary" style={{ marginTop: "0.5rem" }}>
+              Book Now
+            </Link>
           </div>
           <div className="card account-panel">
             <h2>Send a message</h2>
+            <p style={{ color: "var(--color-text-muted)", marginTop: 0 }}>
+              We’ll open WhatsApp with your note so you can finish sending on your phone.
+            </p>
             <form className="auth-form" onSubmit={handleSubmit}>
               <label>
                 Name
@@ -70,8 +78,8 @@ export default function ContactUsPage() {
           </div>
         </div>
 
-        <div style={{ marginTop: "var(--spacing-2xl)" }}>
-          <h2 style={{ marginBottom: "var(--spacing-md)" }}>Find us on the map</h2>
+        <div className="contact-map-block">
+          <h2>Find us on the map</h2>
           <LocationMap title="The O' Apartments contact map" />
         </div>
       </section>
