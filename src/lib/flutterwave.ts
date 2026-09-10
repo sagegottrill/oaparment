@@ -44,10 +44,11 @@ export async function initializeFlutterwavePayment(
       amount: input.amount,
       currency: input.currency ?? "NGN",
       redirect_url: input.redirectUrl,
+      payment_options: "card,ussd,banktransfer,account",
       customer: input.customer,
       meta: input.meta,
       customizations: input.customizations ?? {
-        title: "The O' Apartments",
+        title: "The O Apartments",
         description: "Suite booking payment",
       },
     }),

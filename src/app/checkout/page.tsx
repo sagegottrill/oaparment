@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useEffect, useMemo, useState } from "react";
 import { BOOK_NOW_HREF } from "@/lib/booking";
+import { openFlutterwaveCheckout } from "@/lib/flutterwave-inline";
 import { createClient } from "@/lib/supabase/client";
 import { formatNaira, getSuite, nightsBetween } from "@/lib/suites";
 
@@ -116,14 +117,42 @@ function CheckoutContent() {
         }),
       });
 
-      const payload = (await response.json()) as { paymentLink?: string; error?: string };
-      if (!response.ok || !payload.paymentLink) {
+      const payload = (await response.json()) as {
+        paymentLink?: string;
+        txRef?: string;
+        total?: number;
+        error?: string;
+      };
+      if (!response.ok || !payload.txRef || typeof payload.total !== "number") {
         setError(payload.error ?? "Could not start Flutterwave payment.");
         return;
       }
 
-      setNotice("Redirecting to Flutterwave…");
-      window.location.href = payload.paymentLink;
+      setNotice("Opening Flutterwave…");
+      try {
+        await openFlutterwaveCheckout({
+          txRef: payload.txRef,
+          amount: payload.total,
+          customer: {
+            email,
+            name,
+            phonenumber: phone,
+          },
+          meta: {
+            suite_id: suite.id,
+          },
+          title: "The O Apartments",
+          description: bothSuites ? "Unit A + Unit B" : suite.title,
+          redirectUrl: `${window.location.origin}/checkout/success`,
+        });
+      } catch {
+        if (!payload.paymentLink) {
+          setError("Could not open Flutterwave checkout. Please try again.");
+          return;
+        }
+        setNotice("Redirecting to Flutterwave…");
+        window.location.href = payload.paymentLink;
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Checkout failed");
     } finally {
