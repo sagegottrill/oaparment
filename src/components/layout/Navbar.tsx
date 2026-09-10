@@ -68,7 +68,7 @@ export default function Navbar() {
             <Link href="/login" className="btn btn-outline nav-btn">
               Sign in
             </Link>
-            <Link href="/checkout" className="btn btn-primary nav-btn">
+            <Link href="/rooms/unit-a" className="btn btn-primary nav-btn">
               Book Now
             </Link>
           </div>
