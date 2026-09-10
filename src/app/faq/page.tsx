@@ -155,7 +155,7 @@ export default function FaqPage() {
           <p style={{ fontSize: '1.1rem', marginBottom: 'var(--spacing-xl)', color: 'var(--color-text-muted)' }}>
             Experience comfort, convenience, and peace of mind when you book your next stay with us.
           </p>
-          <a href="https://wa.link/ubsow7" target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ padding: 'var(--spacing-sm) var(--spacing-xl)', fontSize: '1.1rem' }}>
+          <a href="/rooms/unit-a" className="btn btn-primary" style={{ padding: 'var(--spacing-sm) var(--spacing-xl)', fontSize: '1.1rem' }}>
             Book Now
           </a>
         </div>

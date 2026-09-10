@@ -18,14 +18,17 @@ export default function Footer() {
             <Image
               src="/logo.jpeg"
               alt="The O' Apartments"
-              width={200}
-              height={52}
+              width={260}
+              height={68}
               className="footer-logo"
             />
           </Link>
           <p style={{ color: "rgba(255,255,255,0.85)" }}>
             Enjoy a taste of luxury in Ilaro. Designed for travelers who value style and convenience.
           </p>
+          <Link href="/rooms/unit-a" className="btn btn-primary" style={{ marginTop: "var(--spacing-md)" }}>
+            Book Now
+          </Link>
         </div>
         <div>
           <h4 style={{ color: "var(--color-text-light)" }}>Explore</h4>

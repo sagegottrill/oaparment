@@ -343,23 +343,35 @@ textarea.input:focus {
 
 .brand-logo {
   width: auto;
-  height: 48px;
-  max-width: min(220px, 58vw);
+  height: 64px;
+  max-width: min(280px, 62vw);
   object-fit: contain;
   flex-shrink: 0;
   background: #fff;
-  border-radius: 8px;
-  padding: 4px 8px;
+  border-radius: 10px;
+  padding: 6px 10px;
+  box-shadow: var(--shadow-sm);
 }
 
 .footer-logo {
   width: auto;
-  height: 52px;
-  max-width: 220px;
+  height: 64px;
+  max-width: 260px;
   object-fit: contain;
   background: #fff;
-  border-radius: 8px;
-  padding: 6px 10px;
+  border-radius: 10px;
+  padding: 8px 12px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  z-index: 101;
+}
+
+.header-book-btn {
+  display: none;
 }
 
 .nav-toggle {
@@ -437,13 +449,14 @@ textarea.input:focus {
 
 .hero-logo {
   width: auto;
-  height: clamp(48px, 10vw, 68px);
-  max-width: min(280px, 80vw);
+  height: clamp(64px, 14vw, 88px);
+  max-width: min(340px, 88vw);
   object-fit: contain;
   background: #fff;
-  border-radius: 10px;
-  padding: 8px 12px;
+  border-radius: 12px;
+  padding: 10px 14px;
   margin-bottom: var(--spacing-lg);
+  box-shadow: var(--shadow-md);
 }
 
 .home-media {
@@ -554,7 +567,8 @@ textarea.input:focus {
   }
 
   .brand-logo {
-    height: 44px;
+    height: 56px;
+    max-width: min(240px, 52vw);
   }
 }
 
@@ -569,6 +583,14 @@ textarea.input:focus {
 
   .nav-toggle {
     display: inline-flex;
+  }
+
+  .header-book-btn {
+    display: inline-flex;
+  }
+
+  .nav-book-desktop {
+    display: none;
   }
 
   .site-nav {
@@ -668,8 +690,8 @@ textarea.input:focus {
 
 @media (max-width: 480px) {
   .brand-logo {
-    height: 40px;
-    max-width: min(180px, 55vw);
+    height: 48px;
+    max-width: min(200px, 48vw);
   }
 
   .container {
@@ -1070,5 +1092,57 @@ textarea.input:focus {
 
   .suite-offers {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Persistent Book Now band */
+.book-now-cta {
+  background: var(--color-brand-green);
+  color: var(--color-text-light);
+  padding: clamp(2rem, 6vw, 3.5rem) 0;
+}
+
+.book-now-cta h2 {
+  color: var(--color-text-light);
+  margin: 0 0 0.4rem;
+}
+
+.book-now-cta p {
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+}
+
+.book-now-cta-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.book-now-cta-actions {
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.book-now-wa {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.book-now-wa:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+@media (max-width: 768px) {
+  .book-now-cta-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .book-now-cta-actions .btn {
+    width: 100%;
   }
 }

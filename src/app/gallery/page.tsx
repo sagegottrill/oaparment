@@ -6,12 +6,7 @@ export default function GalleryPage() {
       <section className="page-hero">
         <div className="container">
           <h1 style={{ margin: 0, marginBottom: "var(--spacing-md)" }}>Our Gallery</h1>
-          <a
-            href="https://wa.link/ubsow7"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-primary"
-          >
+          <a href="/rooms/unit-a" className="btn btn-primary">
             Book Now
           </a>
         </div>

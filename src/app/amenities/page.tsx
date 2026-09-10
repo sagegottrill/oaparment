@@ -42,8 +42,8 @@ export default function AmenitiesPage() {
           <p style={{ fontSize: '1.1rem', marginBottom: 'var(--spacing-xl)', color: 'var(--color-text-muted)' }}>
             Whether you’re booking for a night, a week, or a month, we offer flexible plans that fit your schedule and budget.
           </p>
-          <a href="https://wa.link/ubsow7" target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ padding: 'var(--spacing-sm) var(--spacing-xl)', fontSize: '1.1rem' }}>
-            Book with us!
+          <a href="/rooms/unit-a" className="btn btn-primary" style={{ padding: 'var(--spacing-sm) var(--spacing-xl)', fontSize: '1.1rem' }}>
+            Book Now
           </a>
         </div>
       </section>

@@ -39,24 +39,30 @@ export default function Navbar() {
           <Image
             src="/logo.jpeg"
             alt="The O' Apartments"
-            width={220}
-            height={56}
+            width={280}
+            height={72}
             className="brand-logo"
             priority
           />
         </Link>
 
-        <button
-          type="button"
-          className="nav-toggle"
-          aria-label={open ? "Close menu" : "Open menu"}
-          aria-expanded={open}
-          onClick={() => setOpen((value) => !value)}
-        >
-          <span className={open ? "nav-toggle-bar open-top" : "nav-toggle-bar"} />
-          <span className={open ? "nav-toggle-bar open-mid" : "nav-toggle-bar"} />
-          <span className={open ? "nav-toggle-bar open-bot" : "nav-toggle-bar"} />
-        </button>
+        <div className="header-right">
+          <Link href="/rooms/unit-a" className="btn btn-primary nav-btn header-book-btn">
+            Book Now
+          </Link>
+
+          <button
+            type="button"
+            className="nav-toggle"
+            aria-label={open ? "Close menu" : "Open menu"}
+            aria-expanded={open}
+            onClick={() => setOpen((value) => !value)}
+          >
+            <span className={open ? "nav-toggle-bar open-top" : "nav-toggle-bar"} />
+            <span className={open ? "nav-toggle-bar open-mid" : "nav-toggle-bar"} />
+            <span className={open ? "nav-toggle-bar open-bot" : "nav-toggle-bar"} />
+          </button>
+        </div>
 
         <nav className={open ? "site-nav open" : "site-nav"}>
           {links.map((link) => (
@@ -68,7 +74,7 @@ export default function Navbar() {
             <Link href="/login" className="btn btn-outline nav-btn">
               Sign in
             </Link>
-            <Link href="/rooms/unit-a" className="btn btn-primary nav-btn">
+            <Link href="/rooms/unit-a" className="btn btn-primary nav-btn nav-book-desktop">
               Book Now
             </Link>
           </div>

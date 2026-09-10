@@ -16,8 +16,8 @@ export default function Home() {
             <Image
               src="/logo.jpeg"
               alt="The O' Apartments"
-              width={260}
-              height={68}
+              width={320}
+              height={84}
               className="hero-logo"
               priority
             />
@@ -56,7 +56,7 @@ export default function Home() {
             </div>
 
             <div className="flex gap-md" style={{ flexWrap: "wrap" }}>
-              <Link href="/checkout" className="btn btn-primary">
+              <Link href="/rooms/unit-a" className="btn btn-primary">
                 Book now
               </Link>
               <Link href="/our-apartments" className="btn" style={{ backgroundColor: "transparent", border: "1px solid var(--color-primary)", color: "var(--color-primary)" }}>
