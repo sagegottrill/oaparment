@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { formatNaira, nightsBetween, suites, type SuiteProduct } from "@/lib/suites";
+import { cautionFeeForStay, formatNaira, nightsBetween, suites, type SuiteProduct } from "@/lib/suites";
 
 type SuiteChoice = "unit-a" | "unit-b" | "both";
 
@@ -69,7 +69,7 @@ export default function BookingPanel({ initialSuite, embedded = false }: Booking
     return "unit-a";
   });
   const [checkIn, setCheckIn] = useState(today);
-  const [checkOut, setCheckOut] = useState(addDays(today, 1));
+  const [checkOut, setCheckOut] = useState(addDays(today, 2));
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
   const [error, setError] = useState("");
@@ -79,7 +79,7 @@ export default function BookingPanel({ initialSuite, embedded = false }: Booking
   const nights = nightsBetween(checkIn, checkOut);
   const guestCount = adults + children;
   const stayTotal = suite.pricePerNight * Math.max(nights, 1) * rooms;
-  const cautionTotal = suite.cautionFee * rooms;
+  const cautionTotal = cautionFeeForStay(suite.cautionFee);
   const grandTotal = stayTotal + cautionTotal;
   const canContinue = nights >= 1 && guestCount >= 1 && guestCount <= maxGuests;
 
@@ -161,7 +161,7 @@ export default function BookingPanel({ initialSuite, embedded = false }: Booking
     {
       id: "both",
       title: "Both suites",
-      detail: `${formatNaira(suites[0].pricePerNight * 2)}/night · up to 12 guests`,
+      detail: `${formatNaira(suites[0].pricePerNight * 2)}/night · ₦50,000 caution`,
       image: suites[0].images[1] ?? suites[0].images[0],
     },
   ];

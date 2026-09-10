@@ -102,3 +102,8 @@ export function nightsBetween(checkIn: string, checkOut: string) {
   const diff = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
   return Math.max(diff, 0);
 }
+
+/** Caution is a flat ₦50,000 per stay, even when both suites are booked. */
+export function cautionFeeForStay(cautionFee: number) {
+  return cautionFee;
+}

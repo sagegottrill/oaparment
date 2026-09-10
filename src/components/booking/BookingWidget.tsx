@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { type MouseEvent, useMemo, useState } from "react";
-import { formatNaira, nightsBetween, type SuiteProduct } from "@/lib/suites";
+import { cautionFeeForStay, formatNaira, nightsBetween, type SuiteProduct } from "@/lib/suites";
 
 function toInputDate(date: Date) {
   const year = date.getFullYear();
@@ -20,7 +20,7 @@ function addDays(value: string, days: number) {
 export default function BookingWidget({ suite }: { suite: SuiteProduct }) {
   const today = useMemo(() => toInputDate(new Date()), []);
   const [checkIn, setCheckIn] = useState(today);
-  const [checkOut, setCheckOut] = useState(addDays(today, 1));
+  const [checkOut, setCheckOut] = useState(addDays(today, 2));
   const [rooms, setRooms] = useState(1);
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
@@ -30,7 +30,7 @@ export default function BookingWidget({ suite }: { suite: SuiteProduct }) {
   const maxGuestsAllowed = suite.maxGuests * rooms;
   const guestCount = adults + children;
   const stayTotal = suite.pricePerNight * Math.max(nights, 1) * rooms;
-  const cautionTotal = suite.cautionFee * rooms;
+  const cautionTotal = cautionFeeForStay(suite.cautionFee);
   const grandTotal = stayTotal + cautionTotal;
   const canContinue = nights >= 1 && guestCount >= 1 && guestCount <= maxGuestsAllowed;
 
@@ -164,7 +164,7 @@ export default function BookingWidget({ suite }: { suite: SuiteProduct }) {
         <div>
           <strong>Refundable caution fee</strong>
           <p>
-            {formatNaira(suite.cautionFee)} per suite · fully refundable if no damage is found.
+            {formatNaira(suite.cautionFee)} per stay · fully refundable if no damage is found.
           </p>
         </div>
         <strong>{formatNaira(cautionTotal)}</strong>

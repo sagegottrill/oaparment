@@ -74,16 +74,6 @@ function occupiesSuite(booking: { suite_id: string; rooms: number }, suiteId: st
   return booking.suite_id === suiteId;
 }
 
-function isActiveHold(booking: {
-  payment_status: string;
-  created_at?: string;
-}) {
-  if (booking.payment_status === "paid") return true;
-  if (booking.payment_status !== "pending" || !booking.created_at) return false;
-  const ageMs = Date.now() - new Date(booking.created_at).getTime();
-  return ageMs < 20 * 60 * 1000;
-}
-
 export async function expireStalePendingBookings(admin: AdminClient) {
   const cutoff = new Date(Date.now() - 20 * 60 * 1000).toISOString();
   await admin
@@ -98,17 +88,42 @@ export async function expireStalePendingBookings(admin: AdminClient) {
     .lt("created_at", cutoff);
 }
 
+export async function releaseGuestPendingHolds(
+  admin: AdminClient,
+  input: { guestEmail: string; checkIn: string; checkOut: string }
+) {
+  await admin
+    .from("bookings")
+    .update({
+      status: "cancelled",
+      payment_status: "failed",
+      updated_at: new Date().toISOString(),
+    })
+    .eq("guest_email", input.guestEmail)
+    .eq("status", "pending")
+    .eq("payment_status", "pending")
+    .lt("check_in", input.checkOut)
+    .gt("check_out", input.checkIn);
+}
+
 export async function assertStayAvailable(
   admin: AdminClient,
-  input: { suiteId: string; rooms: number; checkIn: string; checkOut: string }
+  input: { suiteId: string; rooms: number; checkIn: string; checkOut: string; guestEmail?: string }
 ): Promise<string | null> {
   await expireStalePendingBookings(admin);
+  if (input.guestEmail) {
+    await releaseGuestPendingHolds(admin, {
+      guestEmail: input.guestEmail,
+      checkIn: input.checkIn,
+      checkOut: input.checkOut,
+    });
+  }
 
   const { data, error } = await admin
     .from("bookings")
-    .select("suite_id, rooms, check_in, check_out, status, payment_status, created_at")
+    .select("suite_id, rooms, check_in, check_out, status, payment_status, created_at, guest_email")
     .neq("status", "cancelled")
-    .in("payment_status", ["pending", "paid"])
+    .eq("payment_status", "paid")
     .lt("check_in", input.checkOut)
     .gt("check_out", input.checkIn);
 
@@ -116,11 +131,10 @@ export async function assertStayAvailable(
     return null;
   }
 
-  const blocking = (data ?? []).filter(isActiveHold);
   const needed = input.rooms >= 2 ? ["unit-a", "unit-b"] : [input.suiteId];
 
   for (const suiteId of needed) {
-    const taken = blocking.some((booking) => occupiesSuite(booking, suiteId));
+    const taken = (data ?? []).some((booking) => occupiesSuite(booking, suiteId));
     if (taken) {
       return "Those dates are already reserved. Please choose different dates or the other suite.";
     }

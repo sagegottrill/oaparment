@@ -6,7 +6,7 @@ import { FormEvent, Suspense, useEffect, useMemo, useState } from "react";
 import { BOOK_NOW_HREF } from "@/lib/booking";
 import { openFlutterwaveCheckout } from "@/lib/flutterwave-inline";
 import { createClient } from "@/lib/supabase/client";
-import { formatNaira, getSuite, nightsBetween } from "@/lib/suites";
+import { cautionFeeForStay, formatNaira, getSuite, nightsBetween } from "@/lib/suites";
 
 function formatDisplayDate(value: string | null) {
   if (!value) return null;
@@ -70,7 +70,7 @@ function CheckoutContent() {
   }, []);
 
   const stayTotal = (suite?.pricePerNight ?? 0) * Math.max(nights, 1) * rooms;
-  const cautionTotal = (suite?.cautionFee ?? 0) * rooms;
+  const cautionTotal = cautionFeeForStay(suite?.cautionFee ?? 0);
   const total = stayTotal + cautionTotal;
 
   const whatsappMessage = useMemo(() => {
@@ -227,7 +227,7 @@ function CheckoutContent() {
                   type="tel"
                   name="phone"
                   required
-                  pattern="[0-9+\\s-]{8,}"
+                  pattern="[0-9+ \-]{8,}"
                   value={phone}
                   onChange={(event) => setPhone(event.target.value)}
                   placeholder="080..."

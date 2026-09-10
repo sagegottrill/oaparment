@@ -4,7 +4,7 @@ import { getAppUrl, getFlutterwaveLogoUrl } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 import { assertStayAvailable, loadCheckoutSuite } from "@/lib/checkout-suite";
 import { initializeFlutterwavePayment } from "@/lib/flutterwave";
-import { nightsBetween } from "@/lib/suites";
+import { cautionFeeForStay, nightsBetween } from "@/lib/suites";
 
 function makeTxRef() {
   return `OA-${Date.now()}-${Math.random().toString(36).slice(2, 10).toUpperCase()}`;
@@ -78,13 +78,14 @@ export async function POST(request: Request) {
       rooms,
       checkIn,
       checkOut,
+      guestEmail,
     });
     if (conflict) {
       return NextResponse.json({ error: conflict }, { status: 409 });
     }
 
     const stayTotal = suite.pricePerNight * nights * rooms;
-    const cautionFee = suite.cautionFee * rooms;
+    const cautionFee = cautionFeeForStay(suite.cautionFee);
     const total = stayTotal + cautionFee;
     const txRef = makeTxRef();
 
