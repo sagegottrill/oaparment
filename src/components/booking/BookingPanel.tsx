@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { formatNaira, nightsBetween, suites, type SuiteProduct } from "@/lib/suites";
 
 type SuiteChoice = "unit-a" | "unit-b" | "both";
@@ -27,16 +27,6 @@ function formatLongDate(value: string) {
     month: "short",
     year: "numeric",
   });
-}
-
-function openPicker(input: HTMLInputElement | null) {
-  if (!input) return;
-  try {
-    input.showPicker();
-  } catch {
-    input.focus();
-    input.click();
-  }
 }
 
 function resolveChoice(choice: SuiteChoice): {
@@ -72,8 +62,6 @@ export default function BookingPanel({ initialSuite, embedded = false }: Booking
   const router = useRouter();
   const searchParams = useSearchParams();
   const today = useMemo(() => toInputDate(new Date()), []);
-  const checkInRef = useRef<HTMLInputElement>(null);
-  const checkOutRef = useRef<HTMLInputElement>(null);
 
   const [choice, setChoice] = useState<SuiteChoice>(() => {
     if (initialSuite?.id === "unit-b") return "unit-b";
@@ -188,7 +176,7 @@ export default function BookingPanel({ initialSuite, embedded = false }: Booking
         </div>
       ) : null}
 
-      <div className="booking-suite-picker has-three">
+      <div className={embedded ? "booking-suite-picker has-three is-compact" : "booking-suite-picker has-three"}>
         {pickerOptions.map((item) => (
           <button
             key={item.id}
@@ -196,10 +184,12 @@ export default function BookingPanel({ initialSuite, embedded = false }: Booking
             className={item.id === choice ? "booking-suite-option active" : "booking-suite-option"}
             onClick={() => selectChoice(item.id)}
           >
-            <span className="booking-suite-option-media" style={{ backgroundImage: `url(${item.image})` }} />
+            {embedded ? null : (
+              <span className="booking-suite-option-media" style={{ backgroundImage: `url(${item.image})` }} />
+            )}
             <span className="booking-suite-option-copy">
               <strong>{item.title}</strong>
-              <small>{item.detail}</small>
+              {embedded ? null : <small>{item.detail}</small>}
             </span>
           </button>
         ))}
@@ -208,13 +198,10 @@ export default function BookingPanel({ initialSuite, embedded = false }: Booking
       <div className="booking-panel-grid">
         <div className="booking-panel-controls">
           <div className="booking-date-grid">
-            <div className="booking-date-card">
-              <button type="button" className="booking-date-trigger" onClick={() => openPicker(checkInRef.current)}>
-                <span>Check in</span>
-                <strong>{formatLongDate(checkIn)}</strong>
-              </button>
+            <label className="booking-date-card">
+              <span>Check in</span>
+              <strong>{formatLongDate(checkIn)}</strong>
               <input
-                ref={checkInRef}
                 className="booking-date-native"
                 type="date"
                 value={checkIn}
@@ -227,20 +214,17 @@ export default function BookingPanel({ initialSuite, embedded = false }: Booking
                   if (nightsBetween(nextIn, checkOut) < 1) setCheckOut(addDays(nextIn, 1));
                 }}
               />
-            </div>
+            </label>
 
             <div className="booking-nights-badge" aria-live="polite">
               <strong>{Math.max(nights, 1)}</strong>
               <span>{Math.max(nights, 1) === 1 ? "night" : "nights"}</span>
             </div>
 
-            <div className="booking-date-card">
-              <button type="button" className="booking-date-trigger" onClick={() => openPicker(checkOutRef.current)}>
-                <span>Check out</span>
-                <strong>{formatLongDate(checkOut)}</strong>
-              </button>
+            <label className="booking-date-card">
+              <span>Check out</span>
+              <strong>{formatLongDate(checkOut)}</strong>
               <input
-                ref={checkOutRef}
                 className="booking-date-native"
                 type="date"
                 value={checkOut}
@@ -251,7 +235,7 @@ export default function BookingPanel({ initialSuite, embedded = false }: Booking
                   setError("");
                 }}
               />
-            </div>
+            </label>
           </div>
 
           <div className="booking-stepper-card">
@@ -343,7 +327,7 @@ export default function BookingPanel({ initialSuite, embedded = false }: Booking
             Continue to secure checkout
           </button>
           <p className="booking-summary-note">Pay with Flutterwave · WhatsApp support available</p>
-          {choice !== "both" ? (
+          {embedded ? null : choice !== "both" ? (
             <Link href={`/rooms/${suite.id}`} className="booking-suite-link">
               View suite photos & details →
             </Link>

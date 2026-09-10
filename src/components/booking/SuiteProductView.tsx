@@ -43,22 +43,16 @@ export default function SuiteProductView({ suite }: { suite: SuiteProduct }) {
             <div>
               <h1 className="suite-title">{suite.title}</h1>
               <p className="suite-price-intro">
-                From <strong>{formatNaira(suite.pricePerNight)}</strong> / night · Up to {suite.maxGuests} guests · Or book
-                both suites together
+                From <strong>{formatNaira(suite.pricePerNight)}</strong> / night · Up to {suite.maxGuests} guests
               </p>
             </div>
-            <div className="suite-hero-actions">
-              <Link href="/book" className="btn btn-outline suite-desktop-book-link">
-                Book either suite
-              </Link>
-              <button
-                type="button"
-                className="btn btn-primary suite-mobile-book-btn"
-                onClick={() => setShowMobileBook(true)}
-              >
-                Book this suite
-              </button>
-            </div>
+            <button
+              type="button"
+              className="btn btn-primary suite-mobile-book-btn"
+              onClick={() => setShowMobileBook(true)}
+            >
+              Book this suite
+            </button>
           </div>
         </div>
       </section>
