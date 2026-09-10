@@ -1,30 +1,77 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+
+const links = [
+  { href: "/", label: "Home" },
+  { href: "/rates", label: "Rates" },
+  { href: "/about-us", label: "About Us" },
+  { href: "/gallery", label: "Gallery" },
+  { href: "/our-apartments", label: "Apartments" },
+  { href: "/amenities", label: "Amenities" },
+  { href: "/blog", label: "Our Blog" },
+  { href: "/faq", label: "FAQ" },
+  { href: "/contact-us", label: "Contact Us" },
+];
 
 export default function Navbar() {
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
   return (
-    <header className="glass" style={{ position: "sticky", top: 0, zIndex: 50 }}>
-      <div className="container flex items-center justify-between" style={{ padding: "var(--spacing-md)" }}>
-        <Link href="/" className="flex items-center gap-sm" style={{ color: "var(--color-brand-green)" }}>
-          <Image src="/logo.jpeg" alt="The O' Apartments" width={44} height={44} style={{ objectFit: "contain" }} />
-          <span style={{ fontSize: "1.2rem", fontWeight: 700 }}>The O&apos; Apartments</span>
+    <header className="glass site-header">
+      <div className="container site-header-inner">
+        <Link href="/" className="brand-link" aria-label="The O' Apartments home">
+          <Image
+            src="/logo.jpeg"
+            alt="The O' Apartments"
+            width={220}
+            height={56}
+            className="brand-logo"
+            priority
+          />
         </Link>
-        <nav className="flex gap-md items-center" style={{ fontSize: "0.9rem", flexWrap: "wrap" }}>
-          <Link href="/">Home</Link>
-          <Link href="/rates">Rates</Link>
-          <Link href="/about-us">About Us</Link>
-          <Link href="/gallery">Gallery</Link>
-          <Link href="/our-apartments">Apartments</Link>
-          <Link href="/amenities">Amenities</Link>
-          <Link href="/blog">Our Blog</Link>
-          <Link href="/faq">FAQ</Link>
-          <Link href="/contact-us">Contact Us</Link>
-          <Link href="/login" className="btn btn-outline" style={{ padding: "var(--spacing-xs) var(--spacing-sm)", fontSize: "0.8rem" }}>
-            Sign in
-          </Link>
-          <Link href="/checkout" className="btn btn-primary" style={{ padding: "var(--spacing-xs) var(--spacing-md)" }}>
-            Book Now
-          </Link>
+
+        <button
+          type="button"
+          className="nav-toggle"
+          aria-label={open ? "Close menu" : "Open menu"}
+          aria-expanded={open}
+          onClick={() => setOpen((value) => !value)}
+        >
+          <span className={open ? "nav-toggle-bar open-top" : "nav-toggle-bar"} />
+          <span className={open ? "nav-toggle-bar open-mid" : "nav-toggle-bar"} />
+          <span className={open ? "nav-toggle-bar open-bot" : "nav-toggle-bar"} />
+        </button>
+
+        <nav className={open ? "site-nav open" : "site-nav"}>
+          {links.map((link) => (
+            <Link key={link.href} href={link.href} className="nav-link">
+              {link.label}
+            </Link>
+          ))}
+          <div className="nav-actions">
+            <Link href="/login" className="btn btn-outline nav-btn">
+              Sign in
+            </Link>
+            <Link href="/checkout" className="btn btn-primary nav-btn">
+              Book Now
+            </Link>
+          </div>
         </nav>
       </div>
     </header>

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 
@@ -18,6 +19,9 @@ export default function LoginPage() {
   return (
     <main className="auth-screen">
       <div className="auth-card">
+        <Link href="/" aria-label="The O' Apartments home" style={{ display: "inline-block", marginBottom: "var(--spacing-md)" }}>
+          <Image src="/logo.jpeg" alt="The O' Apartments" width={200} height={52} className="brand-logo" priority />
+        </Link>
         <p className="eyebrow">Guest access</p>
         <h1>Welcome back</h1>
         <p>Sign in to manage bookings, invoices, and your stay details.</p>

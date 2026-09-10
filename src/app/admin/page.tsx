@@ -20,6 +20,7 @@ export default function AdminDashboardPage() {
       
       <div className="card" style={{ padding: 'var(--spacing-lg)' }}>
         <h2 style={{ marginBottom: 'var(--spacing-md)' }}>Recent Bookings</h2>
+        <div className="table-wrap">
         <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
@@ -47,6 +48,7 @@ export default function AdminDashboardPage() {
             </tr>
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

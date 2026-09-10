@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export default function Footer() {
@@ -8,12 +9,20 @@ export default function Footer() {
         color: "var(--color-text-light)",
         borderTop: "none",
         marginTop: "auto",
-        padding: "var(--spacing-3xl) 0",
+        padding: "clamp(2.5rem, 8vw, 5rem) 0",
       }}
     >
       <div className="container grid grid-cols-4 gap-xl">
         <div>
-          <h3 style={{ color: "var(--color-primary)" }}>The O&apos; Apartments</h3>
+          <Link href="/" aria-label="The O' Apartments home" style={{ display: "inline-block", marginBottom: "var(--spacing-md)" }}>
+            <Image
+              src="/logo.jpeg"
+              alt="The O' Apartments"
+              width={200}
+              height={52}
+              className="footer-logo"
+            />
+          </Link>
           <p style={{ color: "rgba(255,255,255,0.85)" }}>
             Enjoy a taste of luxury in Ilaro. Designed for travelers who value style and convenience.
           </p>

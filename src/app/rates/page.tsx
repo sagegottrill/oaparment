@@ -46,16 +46,17 @@ export default function RatesPage() {
       <section className="container" style={{ padding: 'var(--spacing-3xl) var(--spacing-md)' }}>
         <div className="flex-col gap-xl" style={{ maxWidth: '800px', margin: '0 auto' }}>
           {units.map((unit) => (
-            <div key={unit.id} className="card flex" style={{ overflow: 'hidden' }}>
-              <div style={{ flex: 1, minHeight: '250px', backgroundImage: `url(${unit.image})`, backgroundSize: 'cover', backgroundPosition: 'center' }}></div>
-              <div style={{ flex: 1.5, padding: 'var(--spacing-xl)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div key={unit.id} className="card rate-card">
+              <div className="rate-card-image" style={{ backgroundImage: `url(${unit.image})` }} />
+              <div className="rate-card-body">
                 <div>
-                  <h2 style={{ fontSize: '1.5rem', marginBottom: 'var(--spacing-xs)' }}>{unit.title}</h2>
+                  <h2 style={{ fontSize: 'clamp(1.2rem, 4vw, 1.5rem)', marginBottom: 'var(--spacing-xs)' }}>{unit.title}</h2>
                   <div style={{ marginBottom: 'var(--spacing-md)' }}>
-                    <span style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-primary)' }}>{unit.price}</span>
-                    <span style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginLeft: '8px' }}>Per Night / {unit.guests}</span>
+                    <span style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--color-primary)' }}>{unit.price}</span>
+                    <span style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', display: 'inline-block', marginLeft: '8px' }}>
+                      Per Night / {unit.guests}
+                    </span>
                   </div>
-                  
                   <ul style={{ listStyle: 'none', padding: 0, marginBottom: 'var(--spacing-lg)' }}>
                     {unit.features.map((feature, idx) => (
                       <li key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontSize: '0.95rem' }}>
@@ -64,7 +65,6 @@ export default function RatesPage() {
                     ))}
                   </ul>
                 </div>
-                
                 <Link href={`/rooms/${unit.id}`} className="btn btn-primary" style={{ alignSelf: 'flex-start' }}>
                   Book {unit.title.split(' - ')[0]}
                 </Link>

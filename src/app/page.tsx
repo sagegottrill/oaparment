@@ -1,26 +1,26 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export default function Home() {
   return (
     <main>
       <section
+        className="home-hero"
         style={{
-          minHeight: "78vh",
-          display: "flex",
-          alignItems: "center",
           backgroundImage:
             "linear-gradient(90deg, rgba(10, 54, 34, 0.92) 0%, rgba(10, 54, 34, 0.72) 48%, rgba(10, 54, 34, 0.35) 100%), url(https://images.unsplash.com/photo-1542314831-c53cd3816002?auto=format&fit=crop&w=1920&q=80)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          padding: "var(--spacing-3xl) 0",
-          color: "var(--color-text-light)",
         }}
       >
         <div className="container">
-          <div style={{ maxWidth: "680px" }}>
-            <p className="eyebrow" style={{ color: "var(--color-primary)", borderColor: "var(--color-primary)" }}>
-              The O&apos; Apartments · Ilaro
-            </p>
+          <div className="home-hero-copy">
+            <Image
+              src="/logo.jpeg"
+              alt="The O' Apartments"
+              width={260}
+              height={68}
+              className="hero-logo"
+              priority
+            />
             <h1 style={{ fontSize: "clamp(2.5rem, 6vw, 4rem)", lineHeight: 1.08, marginBottom: "var(--spacing-md)", color: "var(--color-text-light)" }}>
               Enjoy a taste of <span style={{ color: "var(--color-primary)" }}>luxury</span> in <span style={{ color: "var(--color-primary)" }}>Ilaro</span>
             </h1>
@@ -70,16 +70,10 @@ export default function Home() {
       <section style={{ backgroundColor: "var(--color-surface)", padding: "var(--spacing-3xl) 0" }}>
         <div className="container grid grid-cols-2 gap-xl items-center">
           <div
+            className="home-media"
             style={{
-              position: "relative",
-              height: "520px",
-              borderRadius: "28px",
-              overflow: "hidden",
-              boxShadow: "var(--shadow-md)",
               backgroundImage:
                 "url(https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=900&q=80)",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
             }}
           />
 

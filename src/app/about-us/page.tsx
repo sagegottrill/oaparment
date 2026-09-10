@@ -33,7 +33,7 @@ export default function AboutUsPage() {
             </div>
           </div>
           
-          <div style={{ position: 'relative', height: '400px', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+          <div className="home-media" style={{ borderRadius: 'var(--radius-lg)' }}>
              <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(https://images.unsplash.com/photo-1542314831-c53cd3816002?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80)', backgroundSize: 'cover', backgroundPosition: 'center' }}></div>
           </div>
         </div>
@@ -62,7 +62,7 @@ export default function AboutUsPage() {
       {/* Location */}
       <section className="container" style={{ padding: 'var(--spacing-3xl) var(--spacing-md)' }}>
         <div className="grid grid-cols-2 gap-xl items-center">
-           <div style={{ position: 'relative', height: '400px', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+           <div className="home-media" style={{ borderRadius: 'var(--radius-lg)' }}>
              <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(https://images.unsplash.com/photo-1577086664693-894d8405334a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80)', backgroundSize: 'cover', backgroundPosition: 'center' }}></div>
           </div>
           
