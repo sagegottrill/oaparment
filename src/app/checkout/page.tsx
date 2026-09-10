@@ -29,6 +29,7 @@ function CheckoutContent() {
   const adults = Number(params.get("adults") ?? 1);
   const children = Number(params.get("children") ?? 0);
   const [notice, setNotice] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const hasDates = Boolean(checkIn && checkOut && nights > 0);
 
@@ -55,31 +56,44 @@ function CheckoutContent() {
     return `https://wa.me/2348075963676?text=${encodeURIComponent(lines.join("\n"))}`;
   }, [suite, checkIn, checkOut, nights, rooms, adults, children, stayTotal, total]);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setLoading(true);
+    setNotice("");
+
     const form = new FormData(event.currentTarget);
-    const name = String(form.get("name") ?? "");
-    const email = String(form.get("email") ?? "");
-    const phone = String(form.get("phone") ?? "");
-    const notes = String(form.get("notes") ?? "");
 
-    const lines = [
-      `New booking request from ${name}`,
-      `Email: ${email}`,
-      `Phone: ${phone}`,
-      `Suite: ${suite.title}`,
-      `Check-in: ${checkIn}`,
-      `Check-out: ${checkOut}`,
-      `Nights: ${nights}`,
-      `Rooms: ${rooms}, Adults: ${adults}, Children: ${children}`,
-      `Stay: ${formatNaira(stayTotal)}`,
-      `Caution fee: ${formatNaira(suite.cautionFee)}`,
-      `Total: ${formatNaira(total)}`,
-      notes ? `Notes: ${notes}` : "",
-    ].filter(Boolean);
+    try {
+      const response = await fetch("/api/checkout/initialize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          suiteId: suite.id,
+          checkIn,
+          checkOut,
+          nights,
+          rooms,
+          adults,
+          children,
+          guestName: String(form.get("name") ?? ""),
+          guestEmail: String(form.get("email") ?? ""),
+          guestPhone: String(form.get("phone") ?? ""),
+          notes: String(form.get("notes") ?? ""),
+        }),
+      });
 
-    window.open(`https://wa.me/2348075963676?text=${encodeURIComponent(lines.join("\n"))}`, "_blank");
-    setNotice("Opening WhatsApp with your booking details. Our team will confirm shortly.");
+      const payload = (await response.json()) as { paymentLink?: string; error?: string };
+      if (!response.ok || !payload.paymentLink) {
+        setNotice(payload.error ?? "Could not start payment.");
+        return;
+      }
+
+      window.location.href = payload.paymentLink;
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Checkout failed");
+    } finally {
+      setLoading(false);
+    }
   }
 
   if (!hasDates) {
@@ -108,7 +122,7 @@ function CheckoutContent() {
           <div className="card account-panel">
             <h2>Guest details</h2>
             <p style={{ marginBottom: "var(--spacing-md)" }}>
-              Fill this in and we&apos;ll send your request to the front desk on WhatsApp.
+              Pay securely with Flutterwave. Your booking is confirmed after successful payment.
             </p>
             <form className="auth-form" onSubmit={handleSubmit}>
               <label>
@@ -127,8 +141,8 @@ function CheckoutContent() {
                 Special requests
                 <textarea className="input" name="notes" rows={4} placeholder="Arrival time, preferences..." />
               </label>
-              <button className="btn btn-primary" type="submit">
-                Confirm booking on WhatsApp
+              <button className="btn btn-primary" type="submit" disabled={loading}>
+                {loading ? "Opening payment…" : `Pay ${formatNaira(total)}`}
               </button>
             </form>
             {notice ? <p className="form-notice">{notice}</p> : null}

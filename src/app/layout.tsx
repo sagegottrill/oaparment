@@ -7,8 +7,8 @@ export const metadata: Metadata = {
   description:
     "Experience affordable luxury with flexible booking options and exceptional comfort that feels just like home in Ilaro, Ogun State.",
   icons: {
-    icon: "/logo.jpeg",
-    apple: "/logo.jpeg",
+    icon: "/logo.png",
+    apple: "/logo.png",
   },
 };
 

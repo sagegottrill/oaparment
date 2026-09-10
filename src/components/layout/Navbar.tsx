@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BOOK_NOW_HREF } from "@/lib/booking";
+import { createClient } from "@/lib/supabase/client";
 
 const links = [
   { href: "/", label: "Home" },
@@ -16,11 +17,13 @@ const links = [
   { href: "/blog", label: "Our Blog" },
   { href: "/faq", label: "FAQ" },
   { href: "/contact-us", label: "Contact Us" },
+  { href: "/my-account", label: "My account" },
 ];
 
 export default function Navbar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [signedIn, setSignedIn] = useState(false);
 
   useEffect(() => {
     setOpen(false);
@@ -33,15 +36,30 @@ export default function Navbar() {
     };
   }, [open]);
 
+  useEffect(() => {
+    const supabase = createClient();
+    void supabase.auth.getUser().then(({ data }) => {
+      setSignedIn(Boolean(data.user));
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSignedIn(Boolean(session?.user));
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   return (
     <header className="glass site-header">
       <div className="container site-header-inner">
         <Link href="/" className="brand-link" aria-label="The O' Apartments home">
           <Image
-            src="/logo.jpeg"
+            src="/logo.png"
             alt="The O' Apartments"
-            width={280}
-            height={72}
+            width={360}
+            height={88}
             className="brand-logo"
             priority
           />
@@ -72,8 +90,8 @@ export default function Navbar() {
             </Link>
           ))}
           <div className="nav-actions">
-            <Link href="/login" className="btn btn-outline nav-btn">
-              Sign in
+            <Link href={signedIn ? "/my-account" : "/login"} className="btn btn-outline nav-btn">
+              {signedIn ? "My account" : "Sign in"}
             </Link>
             <Link href={BOOK_NOW_HREF} className="btn btn-primary nav-btn nav-book-desktop">
               Book Now

@@ -1,4 +1,22 @@
+"use client";
+
+import { FormEvent, useState } from "react";
+import LocationMap from "@/components/LocationMap";
+
 export default function ContactUsPage() {
+  const [notice, setNotice] = useState("");
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const name = String(form.get("name") ?? "");
+    const email = String(form.get("email") ?? "");
+    const message = String(form.get("message") ?? "");
+    const text = `Hello The O' Apartments,%0A%0AName: ${encodeURIComponent(name)}%0AEmail: ${encodeURIComponent(email)}%0A%0A${encodeURIComponent(message)}`;
+    window.open(`https://wa.me/2348075963676?text=${text}`, "_blank");
+    setNotice("Opening WhatsApp with your message…");
+  }
+
   return (
     <main>
       <section className="page-hero">
@@ -31,7 +49,7 @@ export default function ContactUsPage() {
           </div>
           <div className="card account-panel">
             <h2>Send a message</h2>
-            <form className="auth-form">
+            <form className="auth-form" onSubmit={handleSubmit}>
               <label>
                 Name
                 <input className="input" name="name" required placeholder="Your name" />
@@ -48,7 +66,13 @@ export default function ContactUsPage() {
                 Send message
               </button>
             </form>
+            {notice ? <p className="form-notice">{notice}</p> : null}
           </div>
+        </div>
+
+        <div style={{ marginTop: "var(--spacing-2xl)" }}>
+          <h2 style={{ marginBottom: "var(--spacing-md)" }}>Find us on the map</h2>
+          <LocationMap title="The O' Apartments contact map" />
         </div>
       </section>
     </main>

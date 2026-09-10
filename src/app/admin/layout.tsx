@@ -2,8 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ReactNode, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 const links = [
   { href: "/admin", label: "Dashboard" },
@@ -13,7 +14,17 @@ const links = [
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
+
+  async function handleSignOut() {
+    setSigningOut(true);
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.replace("/login");
+    router.refresh();
+  }
 
   return (
     <div className="admin-shell">
@@ -24,7 +35,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       <aside className={open ? "admin-sidebar open" : "admin-sidebar"}>
         <div className="admin-brand">
           <Link href="/" aria-label="The O' Apartments home">
-            <Image src="/logo.jpeg" alt="The O' Apartments" width={180} height={48} className="brand-logo" />
+            <Image src="/logo.png" alt="The O' Apartments" width={180} height={48} className="brand-logo" />
           </Link>
         </div>
 
@@ -39,9 +50,18 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
               {link.label}
             </Link>
           ))}
-          <Link href="/login" className="admin-link" onClick={() => setOpen(false)}>
-            Sign in
-          </Link>
+          <button
+            type="button"
+            className="admin-link"
+            onClick={() => {
+              setOpen(false);
+              void handleSignOut();
+            }}
+            disabled={signingOut}
+            style={{ textAlign: "left", background: "transparent", border: 0, cursor: "pointer", width: "100%" }}
+          >
+            {signingOut ? "Signing out…" : "Sign out"}
+          </button>
           <Link href="/" className="admin-link" onClick={() => setOpen(false)}>
             Back to site
           </Link>

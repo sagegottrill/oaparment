@@ -5,7 +5,7 @@ export default function RatesPage() {
   const units = [
     {
       id: "unit-a",
-      title: "Unit A - 3 Bedroom Premium Suite",
+      title: "Unit A – 3 Bedroom Premium Suite",
       price: "₦150,000",
       guests: "Up to 6 Guests",
       features: [
@@ -14,11 +14,12 @@ export default function RatesPage() {
         "Heating & Air Conditioning",
         "24/7 Solar Power & Security",
       ],
-      image: apt.bedroom1,
+      image: apt.living7,
+      cta: "Book Unit A",
     },
     {
       id: "unit-b",
-      title: "Unit B - 3 Bedroom Premium Suite",
+      title: "Unit B – 3 Bedroom Premium Suite",
       price: "₦150,000",
       guests: "Up to 6 Guests",
       features: [
@@ -28,6 +29,7 @@ export default function RatesPage() {
         "24/7 Solar Power & Security",
       ],
       image: apt.bedroom10,
+      cta: "Book Unit B",
     },
   ];
 
@@ -66,7 +68,7 @@ export default function RatesPage() {
                   </ul>
                 </div>
                 <Link href={`/rooms/${unit.id}`} className="btn btn-primary" style={{ alignSelf: "flex-start" }}>
-                  Book {unit.title.split(" - ")[0]}
+                  {unit.cta}
                 </Link>
               </div>
             </div>
