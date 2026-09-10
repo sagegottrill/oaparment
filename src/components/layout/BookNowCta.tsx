@@ -1,6 +1,6 @@
 import Link from "next/link";
+import { BOOK_NOW_HREF } from "@/lib/booking";
 
-/** Persistent Book Now CTA used on page bottoms / heroes */
 export default function BookNowCta({
   title = "Ready to reserve your stay?",
   subtitle = "Premium 3-bedroom suites from ₦150,000 per night in Ilaro.",
@@ -16,7 +16,7 @@ export default function BookNowCta({
           <p>{subtitle}</p>
         </div>
         <div className="book-now-cta-actions">
-          <Link href="/rooms/unit-a" className="btn btn-primary">
+          <Link href={BOOK_NOW_HREF} className="btn btn-primary">
             Book Now
           </Link>
           <a href="https://wa.link/ubsow7" target="_blank" rel="noopener noreferrer" className="btn btn-outline book-now-wa">
