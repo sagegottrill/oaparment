@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { BOOK_NOW_HREF } from "@/lib/booking";
 
 export default function Footer() {
   return (
@@ -26,7 +27,7 @@ export default function Footer() {
           <p style={{ color: "rgba(255,255,255,0.85)" }}>
             Enjoy a taste of luxury in Ilaro. Designed for travelers who value style and convenience.
           </p>
-          <Link href="/rooms/unit-a" className="btn btn-primary" style={{ marginTop: "var(--spacing-md)" }}>
+          <Link href={BOOK_NOW_HREF} className="btn btn-primary" style={{ marginTop: "var(--spacing-md)" }}>
             Book Now
           </Link>
         </div>

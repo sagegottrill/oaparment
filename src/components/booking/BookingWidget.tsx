@@ -153,7 +153,7 @@ export default function BookingWidget({ suite }: Props) {
       </div>
 
       <Link href={checkoutHref} className="btn btn-primary booking-cta">
-        Book now
+        Continue to checkout
       </Link>
     </aside>
   );

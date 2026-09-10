@@ -1,22 +1,97 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { FormEvent, Suspense, useEffect, useMemo, useState } from "react";
+import { BOOK_NOW_HREF } from "@/lib/booking";
 import { formatNaira, getSuite } from "@/lib/suites";
 
+function formatDisplayDate(value: string | null) {
+  if (!value) return null;
+  const date = new Date(`${value}T12:00:00`);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleDateString("en-GB", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
 function CheckoutContent() {
+  const router = useRouter();
   const params = useSearchParams();
   const suite = getSuite(params.get("suite") ?? "unit-a");
   const checkIn = params.get("checkIn");
   const checkOut = params.get("checkOut");
-  const nights = Number(params.get("nights") ?? 1);
+  const nights = Number(params.get("nights") ?? 0);
   const rooms = Number(params.get("rooms") ?? 1);
   const adults = Number(params.get("adults") ?? 1);
   const children = Number(params.get("children") ?? 0);
+  const [notice, setNotice] = useState("");
+
+  const hasDates = Boolean(checkIn && checkOut && nights > 0);
+
+  useEffect(() => {
+    if (!hasDates) {
+      router.replace(`/rooms/${suite.id}`);
+    }
+  }, [hasDates, router, suite.id]);
 
   const stayTotal = suite.pricePerNight * Math.max(nights, 1) * Math.max(rooms, 1);
   const total = stayTotal + suite.cautionFee;
+
+  const whatsappMessage = useMemo(() => {
+    const lines = [
+      `Hello The O' Apartments, I'd like to book ${suite.title}.`,
+      `Check-in: ${checkIn ?? "-"}`,
+      `Check-out: ${checkOut ?? "-"}`,
+      `Nights: ${nights}`,
+      `Rooms: ${rooms}, Adults: ${adults}, Children: ${children}`,
+      `Stay: ${formatNaira(stayTotal)}`,
+      `Caution fee: ${formatNaira(suite.cautionFee)}`,
+      `Total: ${formatNaira(total)}`,
+    ];
+    return `https://wa.me/2348075963676?text=${encodeURIComponent(lines.join("\n"))}`;
+  }, [suite, checkIn, checkOut, nights, rooms, adults, children, stayTotal, total]);
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const name = String(form.get("name") ?? "");
+    const email = String(form.get("email") ?? "");
+    const phone = String(form.get("phone") ?? "");
+    const notes = String(form.get("notes") ?? "");
+
+    const lines = [
+      `New booking request from ${name}`,
+      `Email: ${email}`,
+      `Phone: ${phone}`,
+      `Suite: ${suite.title}`,
+      `Check-in: ${checkIn}`,
+      `Check-out: ${checkOut}`,
+      `Nights: ${nights}`,
+      `Rooms: ${rooms}, Adults: ${adults}, Children: ${children}`,
+      `Stay: ${formatNaira(stayTotal)}`,
+      `Caution fee: ${formatNaira(suite.cautionFee)}`,
+      `Total: ${formatNaira(total)}`,
+      notes ? `Notes: ${notes}` : "",
+    ].filter(Boolean);
+
+    window.open(`https://wa.me/2348075963676?text=${encodeURIComponent(lines.join("\n"))}`, "_blank");
+    setNotice("Opening WhatsApp with your booking details. Our team will confirm shortly.");
+  }
+
+  if (!hasDates) {
+    return (
+      <main className="container section-pad">
+        <p>Taking you to pick your dates…</p>
+        <Link href={BOOK_NOW_HREF} className="btn btn-primary">
+          Choose dates
+        </Link>
+      </main>
+    );
+  }
 
   return (
     <main>
@@ -32,7 +107,10 @@ function CheckoutContent() {
         <div className="checkout-grid">
           <div className="card account-panel">
             <h2>Guest details</h2>
-            <form className="auth-form">
+            <p style={{ marginBottom: "var(--spacing-md)" }}>
+              Fill this in and we&apos;ll send your request to the front desk on WhatsApp.
+            </p>
+            <form className="auth-form" onSubmit={handleSubmit}>
               <label>
                 Full name
                 <input className="input" name="name" required placeholder="Your full name" />
@@ -50,13 +128,14 @@ function CheckoutContent() {
                 <textarea className="input" name="notes" rows={4} placeholder="Arrival time, preferences..." />
               </label>
               <button className="btn btn-primary" type="submit">
-                Confirm booking request
+                Confirm booking on WhatsApp
               </button>
             </form>
+            {notice ? <p className="form-notice">{notice}</p> : null}
             <p style={{ marginTop: "var(--spacing-md)", fontSize: "0.9rem" }}>
-              Or book instantly on WhatsApp:{" "}
-              <a href="https://wa.link/ubsow7" target="_blank" rel="noopener noreferrer">
-                Chat with us
+              Prefer chat only?{" "}
+              <a href={whatsappMessage} target="_blank" rel="noopener noreferrer">
+                Open WhatsApp with stay summary
               </a>
             </p>
           </div>
@@ -70,11 +149,11 @@ function CheckoutContent() {
               </li>
               <li>
                 <span>Check in</span>
-                <strong>{checkIn ?? "Select dates"}</strong>
+                <strong>{formatDisplayDate(checkIn)}</strong>
               </li>
               <li>
                 <span>Check out</span>
-                <strong>{checkOut ?? "Select dates"}</strong>
+                <strong>{formatDisplayDate(checkOut)}</strong>
               </li>
               <li>
                 <span>Nights</span>

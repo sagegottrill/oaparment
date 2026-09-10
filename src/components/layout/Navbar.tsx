@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { BOOK_NOW_HREF } from "@/lib/booking";
 
 const links = [
   { href: "/", label: "Home" },
@@ -47,7 +48,7 @@ export default function Navbar() {
         </Link>
 
         <div className="header-right">
-          <Link href="/rooms/unit-a" className="btn btn-primary nav-btn header-book-btn">
+          <Link href={BOOK_NOW_HREF} className="btn btn-primary nav-btn header-book-btn">
             Book Now
           </Link>
 
@@ -74,7 +75,7 @@ export default function Navbar() {
             <Link href="/login" className="btn btn-outline nav-btn">
               Sign in
             </Link>
-            <Link href="/rooms/unit-a" className="btn btn-primary nav-btn nav-book-desktop">
+            <Link href={BOOK_NOW_HREF} className="btn btn-primary nav-btn nav-book-desktop">
               Book Now
             </Link>
           </div>
