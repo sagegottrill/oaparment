@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { apt } from "@/lib/apartment-images";
 
 export default async function RoomDetailsPage({
   params,
@@ -15,27 +16,20 @@ export default async function RoomDetailsPage({
     description:
       "Experience affordable luxury in our premium suite. Enjoy hotel-grade comfort, private ensuites, and a fully fitted kitchen designed for travelers who want style and convenience in Ilaro.",
     amenities: ["Free Wi-Fi", "Air Conditioning", "King Bed", "Fitted Kitchen", "Solar Power", "Secure Parking"],
-    images: [
-      "https://images.unsplash.com/photo-1590490360182-c33d57733427?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1582719508461-905c673771fd?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-      "https://images.unsplash.com/photo-1542314831-c53cd3816002?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-    ],
+    images: [apt.bedroom1, apt.living5, apt.bathroom1, apt.kitchen1],
   };
 
   return (
     <main className="container section-pad">
       <div className="room-gallery" style={{ marginBottom: "var(--spacing-xl)", borderRadius: "var(--radius-lg)", overflow: "hidden" }}>
-        <div
-          className="room-gallery-main"
-          style={{ backgroundImage: `url(${room.images[0]})` }}
-        />
+        <div className="room-gallery-main" style={{ backgroundImage: `url(${room.images[0]})` }} />
         <div className="room-gallery-side">
           <div style={{ backgroundImage: `url(${room.images[1]})` }} />
           <div style={{ backgroundImage: `url(${room.images[2]})` }} />
           <div className="room-gallery-more">
             <span style={{ fontWeight: 600 }}>+ More Photos</span>
           </div>
-          <div style={{ backgroundImage: `url(${room.images[0]})` }} />
+          <div style={{ backgroundImage: `url(${room.images[3]})` }} />
         </div>
       </div>
 

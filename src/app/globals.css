@@ -239,7 +239,7 @@ textarea.input:focus {
   padding: var(--spacing-md);
   background:
     linear-gradient(180deg, rgba(251, 247, 240, 0.94), rgba(251, 247, 240, 0.88)),
-    url(https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=1600&q=70);
+    url(/apartments/20250712_115703.jpg);
   background-size: cover;
   background-position: center;
 }

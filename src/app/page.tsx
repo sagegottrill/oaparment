@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { apt } from "@/lib/apartment-images";
 
 export default function Home() {
   return (
@@ -7,8 +8,7 @@ export default function Home() {
       <section
         className="home-hero"
         style={{
-          backgroundImage:
-            "linear-gradient(90deg, rgba(10, 54, 34, 0.92) 0%, rgba(10, 54, 34, 0.72) 48%, rgba(10, 54, 34, 0.35) 100%), url(https://images.unsplash.com/photo-1542314831-c53cd3816002?auto=format&fit=crop&w=1920&q=80)",
+          backgroundImage: `linear-gradient(90deg, rgba(10, 54, 34, 0.92) 0%, rgba(10, 54, 34, 0.72) 48%, rgba(10, 54, 34, 0.35) 100%), url(${apt.exterior1})`,
         }}
       >
         <div className="container">
@@ -72,8 +72,7 @@ export default function Home() {
           <div
             className="home-media"
             style={{
-              backgroundImage:
-                "url(https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=900&q=80)",
+              backgroundImage: `url(${apt.living3})`,
             }}
           />
 
@@ -140,8 +139,7 @@ export default function Home() {
             <div
               className="feature-photo"
               style={{
-                backgroundImage:
-                  "url(https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=900&q=80)",
+                backgroundImage: `url(${apt.living5})`,
               }}
             />
             <div className="feature-copy">
@@ -172,8 +170,7 @@ export default function Home() {
             <div
               className="feature-photo"
               style={{
-                backgroundImage:
-                  "url(https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=900&q=80)",
+                backgroundImage: `url(${apt.bedroom10})`,
               }}
             />
           </div>
@@ -182,8 +179,7 @@ export default function Home() {
             <div
               className="feature-photo"
               style={{
-                backgroundImage:
-                  "url(https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=900&q=80)",
+                backgroundImage: `url(${apt.parking1})`,
               }}
             />
             <div className="feature-copy">
@@ -214,22 +210,22 @@ export default function Home() {
               {
                 title: "Fully furnished rooms",
                 copy: "2–3 bedroom apartments with everything ready for a seamless stay.",
-                image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80",
+                image: apt.bedroom1,
               },
               {
                 title: "Cozy lighting",
                 copy: "Soft chandelier light that wraps every corner in warmth.",
-                image: "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80",
+                image: apt.lighting,
               },
               {
-                title: "Smart TV",
-                copy: "Streaming-ready entertainment whenever you want to unwind.",
-                image: "https://images.unsplash.com/photo-1593784991095-a205069470b6?auto=format&fit=crop&w=800&q=80",
+                title: "Fitted kitchen",
+                copy: "Cook with ease in a fully equipped modern kitchen.",
+                image: apt.kitchen1,
               },
               {
-                title: "Water heater",
-                copy: "Reliable hot water for comfortable showers any time of day.",
-                image: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=800&q=80",
+                title: "En-suite bathrooms",
+                copy: "Reliable hot water and rainfall showers for comfort anytime.",
+                image: apt.bathroom1,
               },
             ].map((item) => (
               <div key={item.title} className="card" style={{ padding: "var(--spacing-lg)" }}>

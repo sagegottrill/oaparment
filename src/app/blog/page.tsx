@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { apt } from "@/lib/apartment-images";
 
 export default function BlogPage() {
   const posts = [
@@ -9,7 +10,7 @@ export default function BlogPage() {
       date: "May 21, 2026",
       author: "The O' Apartments",
       excerpt: "In today’s remote-first world, your work environment doesn’t have to be a traditional office building.",
-      image: "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+      image: apt.living5,
     },
     {
       id: "shortlet-vs-hotels",
@@ -18,7 +19,7 @@ export default function BlogPage() {
       date: "May 21, 2026",
       author: "The O' Apartments",
       excerpt: "The way we travel has completely changed. While luxury hotels used to be the absolute",
-      image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+      image: apt.bedroom1,
     },
     {
       id: "choose-ilaro",
@@ -27,8 +28,8 @@ export default function BlogPage() {
       date: "May 21, 2026",
       author: "The O' Apartments",
       excerpt: "When planning a weekend escape from the hustle and bustle of city life, Ilaro offers",
-      image: "https://images.unsplash.com/photo-1510798831971-661eb04b3739?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-    }
+      image: apt.exterior1,
+    },
   ];
 
   return (
