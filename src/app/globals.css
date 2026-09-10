@@ -607,10 +607,6 @@ textarea.input:focus {
   z-index: 101;
 }
 
-.header-book-btn {
-  display: none;
-}
-
 .nav-toggle {
   display: none;
   width: 44px;
@@ -903,12 +899,9 @@ textarea.input:focus {
     display: inline-flex;
   }
 
-  .header-book-btn {
-    display: inline-flex;
-  }
-
-  .nav-book-desktop {
-    display: none;
+  .brand-logo {
+    height: 48px;
+    max-width: min(240px, calc(100vw - 6rem));
   }
 
   .site-nav {
@@ -1008,8 +1001,8 @@ textarea.input:focus {
 
 @media (max-width: 480px) {
   .brand-logo {
-    height: 52px;
-    max-width: min(240px, 58vw);
+    height: 44px;
+    max-width: min(220px, calc(100vw - 5.5rem));
   }
 
   .container {

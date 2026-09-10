@@ -65,10 +65,6 @@ export default function Navbar() {
         </Link>
 
         <div className="header-right">
-          <Link href={BOOK_NOW_HREF} className="btn btn-primary nav-btn header-book-btn">
-            Book Now
-          </Link>
-
           <button
             type="button"
             className="nav-toggle"
