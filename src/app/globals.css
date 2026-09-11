@@ -835,6 +835,16 @@ textarea.input:focus {
 
 .admin-brand {
   margin-bottom: var(--spacing-xl);
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.admin-brand-logo {
+  display: block;
+  width: auto;
+  height: 36px;
+  max-width: 100%;
+  object-fit: contain;
 }
 
 .admin-nav {

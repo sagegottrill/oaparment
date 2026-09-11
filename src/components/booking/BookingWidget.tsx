@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { type MouseEvent, useMemo, useState } from "react";
+import { type MouseEvent, useEffect, useMemo, useState } from "react";
 import {
   addCalendarDays,
   cautionFeeForStay,
@@ -26,6 +26,38 @@ export default function BookingWidget({ suite }: { suite: SuiteProduct }) {
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
   const [error, setError] = useState("");
+  const [maxRooms, setMaxRooms] = useState(1);
+  const [suiteBookable, setSuiteBookable] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/suites/availability")
+      .then((response) => response.json())
+      .then(
+        (payload: {
+          availability?: { "unit-a": boolean; "unit-b": boolean };
+          both?: boolean;
+        }) => {
+          if (cancelled || !payload.availability) return;
+          const thisActive =
+            suite.id === "unit-a" || suite.id === "unit-b"
+              ? payload.availability[suite.id]
+              : false;
+          setSuiteBookable(thisActive);
+          setMaxRooms(payload.both ? Math.min(2, suite.maxRooms) : 1);
+          if (!payload.both) setRooms(1);
+        }
+      )
+      .catch(() => {
+        if (!cancelled) {
+          setSuiteBookable(true);
+          setMaxRooms(suite.maxRooms);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [suite.id, suite.maxRooms]);
 
   const nights = nightsThroughLastNight(checkIn, lastNight);
   const checkOut = checkoutFromLastNight(lastNight);
@@ -34,7 +66,8 @@ export default function BookingWidget({ suite }: { suite: SuiteProduct }) {
   const stayTotal = suite.pricePerNight * Math.max(nights, 1) * rooms;
   const cautionTotal = cautionFeeForStay(suite.cautionFee);
   const grandTotal = stayTotal + cautionTotal;
-  const canContinue = nights >= 1 && guestCount >= 1 && guestCount <= maxGuestsAllowed;
+  const canContinue =
+    suiteBookable && nights >= 1 && guestCount >= 1 && guestCount <= maxGuestsAllowed;
 
   function bump(
     setter: (value: number) => void,
@@ -50,7 +83,8 @@ export default function BookingWidget({ suite }: { suite: SuiteProduct }) {
   function handleContinue(event: MouseEvent<HTMLAnchorElement>) {
     if (!canContinue) {
       event.preventDefault();
-      if (nights < 1) setError("Choose a last night on or after check-in.");
+      if (!suiteBookable) setError("This suite is currently unavailable.");
+      else if (nights < 1) setError("Choose a last night on or after check-in.");
       else if (guestCount > maxGuestsAllowed) {
         setError(`With ${rooms} suite(s), you can host up to ${maxGuestsAllowed} guests.`);
       } else setError("Please complete your stay details.");
@@ -58,6 +92,19 @@ export default function BookingWidget({ suite }: { suite: SuiteProduct }) {
   }
 
   const checkoutHref = `/checkout?suite=${suite.id}&checkIn=${checkIn}&checkOut=${checkOut}&nights=${Math.max(nights, 1)}&rooms=${rooms}&adults=${adults}&children=${children}`;
+
+  if (!suiteBookable) {
+    return (
+      <aside className="booking-widget card">
+        <p className="form-error" style={{ margin: 0 }}>
+          This suite is hidden and cannot be booked right now.
+        </p>
+        <Link href="/book" className="btn btn-outline" style={{ marginTop: "1rem" }}>
+          See available suites
+        </Link>
+      </aside>
+    );
+  }
 
   return (
     <aside className="booking-widget card">
@@ -109,10 +156,11 @@ export default function BookingWidget({ suite }: { suite: SuiteProduct }) {
       <div className="booking-guests">
         <h4>Suites & guests</h4>
         <p className="booking-capacity">
-          Book 1 or 2 suites · up to {maxGuestsAllowed} guests for this selection
+          Book 1{maxRooms > 1 ? " or 2" : ""} suite{maxRooms > 1 ? "s" : ""} · up to {maxGuestsAllowed} guests for
+          this selection
         </p>
         {[
-          { label: "Suites", value: rooms, min: 1, max: suite.maxRooms, set: setRooms },
+          { label: "Suites", value: rooms, min: 1, max: maxRooms, set: setRooms },
           { label: "Adults", value: adults, min: 1, max: maxGuestsAllowed, set: setAdults },
           { label: "Children", value: children, min: 0, max: maxGuestsAllowed, set: setChildren },
         ].map((row) => (
@@ -165,9 +213,7 @@ export default function BookingWidget({ suite }: { suite: SuiteProduct }) {
       <div className="booking-caution">
         <div>
           <strong>Refundable caution fee</strong>
-          <p>
-            {formatNaira(suite.cautionFee)} per stay · fully refundable if no damage is found.
-          </p>
+          <p>{formatNaira(suite.cautionFee)} per stay · fully refundable if no damage is found.</p>
         </div>
         <strong>{formatNaira(cautionTotal)}</strong>
       </div>

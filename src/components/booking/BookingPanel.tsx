@@ -16,6 +16,11 @@ import {
 
 type SuiteChoice = "unit-a" | "unit-b" | "both";
 
+type Availability = {
+  "unit-a": boolean;
+  "unit-b": boolean;
+};
+
 function toInputDate(date: Date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -77,6 +82,7 @@ export default function BookingPanel({ initialSuite, embedded = false }: Booking
   const [children, setChildren] = useState(0);
   const [error, setError] = useState("");
   const [hydratedFromUrl, setHydratedFromUrl] = useState(false);
+  const [availability, setAvailability] = useState<Availability | null>(null);
 
   const { suite, rooms, label, maxGuests } = resolveChoice(choice);
   const nights = nightsThroughLastNight(checkIn, lastNight);
@@ -86,6 +92,34 @@ export default function BookingPanel({ initialSuite, embedded = false }: Booking
   const cautionTotal = cautionFeeForStay(suite.cautionFee);
   const grandTotal = stayTotal + cautionTotal;
   const canContinue = nights >= 1 && guestCount >= 1 && guestCount <= maxGuests;
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/suites/availability")
+      .then((response) => response.json())
+      .then((payload: { availability?: Availability }) => {
+        if (cancelled || !payload.availability) return;
+        setAvailability(payload.availability);
+      })
+      .catch(() => {
+        if (!cancelled) setAvailability({ "unit-a": true, "unit-b": true });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!availability) return;
+    const bookable =
+      choice === "both"
+        ? availability["unit-a"] && availability["unit-b"]
+        : availability[choice];
+    if (bookable) return;
+
+    if (availability["unit-a"]) setChoice("unit-a");
+    else if (availability["unit-b"]) setChoice("unit-b");
+  }, [availability, choice]);
 
   useEffect(() => {
     if (initialSuite?.id === "unit-a" || initialSuite?.id === "unit-b") {
@@ -117,7 +151,7 @@ export default function BookingPanel({ initialSuite, embedded = false }: Booking
     if (adultsParam >= 1) setAdults(adultsParam);
     if (childrenParam >= 0 && searchParams.has("children")) setChildren(childrenParam);
     setHydratedFromUrl(true);
-  }, [embedded, hydratedFromUrl, searchParams]);
+  }, [embedded, hydratedFromUrl, searchParams, today]);
 
   function bumpGuests(kind: "adults" | "children", delta: number) {
     if (kind === "adults") {
@@ -134,6 +168,16 @@ export default function BookingPanel({ initialSuite, embedded = false }: Booking
   }
 
   function selectChoice(next: SuiteChoice) {
+    if (availability) {
+      const bookable =
+        next === "both"
+          ? availability["unit-a"] && availability["unit-b"]
+          : availability[next];
+      if (!bookable) {
+        setError("That suite is currently unavailable.");
+        return;
+      }
+    }
     setChoice(next);
     const resolved = resolveChoice(next);
     if (adults + children > resolved.maxGuests) {
@@ -144,6 +188,16 @@ export default function BookingPanel({ initialSuite, embedded = false }: Booking
   }
 
   function continueToCheckout() {
+    if (availability) {
+      const bookable =
+        choice === "both"
+          ? availability["unit-a"] && availability["unit-b"]
+          : availability[choice];
+      if (!bookable) {
+        setError("That suite is currently unavailable.");
+        return;
+      }
+    }
     if (!canContinue) {
       if (nights < 1) setError("Choose a last night on or after check-in.");
       else if (guestCount > maxGuests) setError(`This selection allows up to ${maxGuests} guests.`);
@@ -155,26 +209,33 @@ export default function BookingPanel({ initialSuite, embedded = false }: Booking
     router.push(href);
   }
 
-  const pickerOptions: { id: SuiteChoice; title: string; detail: string; image: string }[] = [
-    {
-      id: "unit-a",
-      title: "Unit A",
-      detail: `${formatNaira(suites[0].pricePerNight)}/night · up to 6 guests`,
-      image: suites[0].images[0],
-    },
-    {
-      id: "unit-b",
-      title: "Unit B",
-      detail: `${formatNaira(suites[1].pricePerNight)}/night · up to 6 guests`,
-      image: suites[1].images[0],
-    },
-    {
-      id: "both",
-      title: "Both suites",
-      detail: `${formatNaira(suites[0].pricePerNight * 2)}/night · ₦50,000 caution`,
-      image: suites[0].images[1] ?? suites[0].images[0],
-    },
-  ];
+  const pickerOptions = (
+    [
+      {
+        id: "unit-a" as const,
+        title: "Unit A",
+        detail: `${formatNaira(suites[0].pricePerNight)}/night · up to 6 guests`,
+        image: suites[0].images[0],
+        bookable: availability ? availability["unit-a"] : true,
+      },
+      {
+        id: "unit-b" as const,
+        title: "Unit B",
+        detail: `${formatNaira(suites[1].pricePerNight)}/night · up to 6 guests`,
+        image: suites[1].images[0],
+        bookable: availability ? availability["unit-b"] : true,
+      },
+      {
+        id: "both" as const,
+        title: "Both suites",
+        detail: `${formatNaira(suites[0].pricePerNight * 2)}/night · ₦50,000 caution`,
+        image: suites[0].images[1] ?? suites[0].images[0],
+        bookable: availability ? availability["unit-a"] && availability["unit-b"] : true,
+      },
+    ] as const
+  ).filter((item) => item.bookable);
+
+  const noneBookable = availability !== null && !availability["unit-a"] && !availability["unit-b"];
 
   return (
     <div className={embedded ? "booking-panel is-embedded" : "booking-panel"}>
@@ -186,168 +247,188 @@ export default function BookingPanel({ initialSuite, embedded = false }: Booking
         </div>
       ) : null}
 
-      <div className={embedded ? "booking-suite-picker has-three is-compact" : "booking-suite-picker has-three"}>
-        {pickerOptions.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            className={item.id === choice ? "booking-suite-option active" : "booking-suite-option"}
-            onClick={() => selectChoice(item.id)}
+      {noneBookable ? (
+        <p className="form-error">No suites are available to book right now. Please check back soon.</p>
+      ) : (
+        <>
+          <div
+            className={
+              embedded
+                ? `booking-suite-picker is-compact ${pickerOptions.length >= 3 ? "has-three" : ""}`
+                : `booking-suite-picker ${pickerOptions.length >= 3 ? "has-three" : ""}`
+            }
           >
-            {embedded ? null : (
-              <span className="booking-suite-option-media" style={{ backgroundImage: `url(${item.image})` }} />
-            )}
-            <span className="booking-suite-option-copy">
-              <strong>{item.title}</strong>
-              {embedded ? null : <small>{item.detail}</small>}
-            </span>
-          </button>
-        ))}
-      </div>
-
-      <div className="booking-panel-grid">
-        <div className="booking-panel-controls">
-          <div className="booking-date-grid">
-            <label className="booking-date-card">
-              <span>Check in</span>
-              <strong>{formatLongDate(checkIn)}</strong>
-              <input
-                className="booking-date-native"
-                type="date"
-                value={checkIn}
-                min={today}
-                aria-label="Check-in date"
-                onChange={(event) => {
-                  const nextIn = event.target.value || today;
-                  setCheckIn(nextIn);
-                  setError("");
-                  if (nightsThroughLastNight(nextIn, lastNight) < 1) setLastNight(nextIn);
-                }}
-              />
-            </label>
-
-            <div className="booking-nights-badge" aria-live="polite">
-              <strong>{Math.max(nights, 1)}</strong>
-              <span>{Math.max(nights, 1) === 1 ? "night" : "nights"}</span>
-            </div>
-
-            <label className="booking-date-card">
-              <span>Last night</span>
-              <strong>{formatLongDate(lastNight)}</strong>
-              <input
-                className="booking-date-native"
-                type="date"
-                value={lastNight}
-                min={checkIn}
-                aria-label="Last night in the suite"
-                onChange={(event) => {
-                  setLastNight(event.target.value || checkIn);
-                  setError("");
-                }}
-              />
-            </label>
+            {pickerOptions.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className={item.id === choice ? "booking-suite-option active" : "booking-suite-option"}
+                onClick={() => selectChoice(item.id)}
+              >
+                {embedded ? null : (
+                  <span className="booking-suite-option-media" style={{ backgroundImage: `url(${item.image})` }} />
+                )}
+                <span className="booking-suite-option-copy">
+                  <strong>{item.title}</strong>
+                  {embedded ? null : <small>{item.detail}</small>}
+                </span>
+              </button>
+            ))}
           </div>
 
-          <div className="booking-stepper-card">
-            <div className="booking-stepper-row">
-              <div>
-                <strong>Adults</strong>
-                <small>Up to {maxGuests} guests for {label}</small>
+          <div className="booking-panel-grid">
+            <div className="booking-panel-controls">
+              <div className="booking-date-grid">
+                <label className="booking-date-card">
+                  <span>Check in</span>
+                  <strong>{formatLongDate(checkIn)}</strong>
+                  <input
+                    className="booking-date-native"
+                    type="date"
+                    value={checkIn}
+                    min={today}
+                    aria-label="Check-in date"
+                    onChange={(event) => {
+                      const nextIn = event.target.value || today;
+                      setCheckIn(nextIn);
+                      setError("");
+                      if (nightsThroughLastNight(nextIn, lastNight) < 1) setLastNight(nextIn);
+                    }}
+                  />
+                </label>
+
+                <div className="booking-nights-badge" aria-live="polite">
+                  <strong>{Math.max(nights, 1)}</strong>
+                  <span>{Math.max(nights, 1) === 1 ? "night" : "nights"}</span>
+                </div>
+
+                <label className="booking-date-card">
+                  <span>Last night</span>
+                  <strong>{formatLongDate(lastNight)}</strong>
+                  <input
+                    className="booking-date-native"
+                    type="date"
+                    value={lastNight}
+                    min={checkIn}
+                    aria-label="Last night in the suite"
+                    onChange={(event) => {
+                      setLastNight(event.target.value || checkIn);
+                      setError("");
+                    }}
+                  />
+                </label>
               </div>
-              <div className="booking-stepper-controls">
-                <button type="button" aria-label="Fewer adults" disabled={adults <= 1} onClick={() => bumpGuests("adults", -1)}>
-                  –
-                </button>
-                <strong>{adults}</strong>
-                <button
-                  type="button"
-                  aria-label="More adults"
-                  disabled={adults + children >= maxGuests}
-                  onClick={() => bumpGuests("adults", 1)}
-                >
-                  +
-                </button>
+
+              <div className="booking-stepper-card">
+                <div className="booking-stepper-row">
+                  <div>
+                    <strong>Adults</strong>
+                    <small>
+                      Up to {maxGuests} guests for {label}
+                    </small>
+                  </div>
+                  <div className="booking-stepper-controls">
+                    <button
+                      type="button"
+                      aria-label="Fewer adults"
+                      disabled={adults <= 1}
+                      onClick={() => bumpGuests("adults", -1)}
+                    >
+                      –
+                    </button>
+                    <strong>{adults}</strong>
+                    <button
+                      type="button"
+                      aria-label="More adults"
+                      disabled={adults + children >= maxGuests}
+                      onClick={() => bumpGuests("adults", 1)}
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+                <div className="booking-stepper-row">
+                  <div>
+                    <strong>Children</strong>
+                    <small>Optional</small>
+                  </div>
+                  <div className="booking-stepper-controls">
+                    <button
+                      type="button"
+                      aria-label="Fewer children"
+                      disabled={children <= 0}
+                      onClick={() => bumpGuests("children", -1)}
+                    >
+                      –
+                    </button>
+                    <strong>{children}</strong>
+                    <button
+                      type="button"
+                      aria-label="More children"
+                      disabled={adults + children >= maxGuests}
+                      onClick={() => bumpGuests("children", 1)}
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="booking-stepper-row">
-              <div>
-                <strong>Children</strong>
-                <small>Optional</small>
-              </div>
-              <div className="booking-stepper-controls">
-                <button
-                  type="button"
-                  aria-label="Fewer children"
-                  disabled={children <= 0}
-                  onClick={() => bumpGuests("children", -1)}
-                >
-                  –
-                </button>
-                <strong>{children}</strong>
-                <button
-                  type="button"
-                  aria-label="More children"
-                  disabled={adults + children >= maxGuests}
-                  onClick={() => bumpGuests("children", 1)}
-                >
-                  +
-                </button>
-              </div>
+
+            <div className="booking-summary-card">
+              <p className="booking-summary-kicker">Stay summary</p>
+              <h3>{choice === "both" ? "Both premium suites" : suite.title}</h3>
+              <ul>
+                <li>
+                  <span>Selection</span>
+                  <strong>{label}</strong>
+                </li>
+                <li>
+                  <span>Dates</span>
+                  <strong>
+                    {formatLongDate(checkIn)} through {formatLongDate(lastNight)} night · leave{" "}
+                    {formatLongDate(checkOut)} 11:00 AM
+                  </strong>
+                </li>
+                <li>
+                  <span>Guests</span>
+                  <strong>
+                    {adults} adults{children ? ` · ${children} children` : ""}
+                  </strong>
+                </li>
+                <li>
+                  <span>Stay total</span>
+                  <strong>{formatNaira(stayTotal)}</strong>
+                </li>
+                <li>
+                  <span>Caution fee</span>
+                  <strong>{formatNaira(cautionTotal)}</strong>
+                </li>
+                <li className="booking-summary-total">
+                  <span>Total due now</span>
+                  <strong>{formatNaira(grandTotal)}</strong>
+                </li>
+              </ul>
+
+              {error ? <p className="form-error">{error}</p> : null}
+
+              <button type="button" className="btn btn-primary booking-cta" onClick={continueToCheckout}>
+                Continue to secure checkout
+              </button>
+              <p className="booking-summary-note">Pay with Flutterwave · WhatsApp support available</p>
+              {embedded ? null : choice !== "both" ? (
+                <Link href={`/rooms/${suite.id}`} className="booking-suite-link">
+                  View suite photos & details →
+                </Link>
+              ) : (
+                <Link href="/our-apartments" className="booking-suite-link">
+                  Compare Unit A & Unit B →
+                </Link>
+              )}
             </div>
           </div>
-        </div>
-
-        <div className="booking-summary-card">
-          <p className="booking-summary-kicker">Stay summary</p>
-          <h3>{choice === "both" ? "Both premium suites" : suite.title}</h3>
-          <ul>
-            <li>
-              <span>Selection</span>
-              <strong>{label}</strong>
-            </li>
-            <li>
-              <span>Dates</span>
-              <strong>
-                {formatLongDate(checkIn)} through {formatLongDate(lastNight)} night · leave {formatLongDate(checkOut)} 11:00 AM
-              </strong>
-            </li>
-            <li>
-              <span>Guests</span>
-              <strong>
-                {adults} adults{children ? ` · ${children} children` : ""}
-              </strong>
-            </li>
-            <li>
-              <span>Stay total</span>
-              <strong>{formatNaira(stayTotal)}</strong>
-            </li>
-            <li>
-              <span>Caution fee</span>
-              <strong>{formatNaira(cautionTotal)}</strong>
-            </li>
-            <li className="booking-summary-total">
-              <span>Total due now</span>
-              <strong>{formatNaira(grandTotal)}</strong>
-            </li>
-          </ul>
-
-          {error ? <p className="form-error">{error}</p> : null}
-
-          <button type="button" className="btn btn-primary booking-cta" onClick={continueToCheckout}>
-            Continue to secure checkout
-          </button>
-          <p className="booking-summary-note">Pay with Flutterwave · WhatsApp support available</p>
-          {embedded ? null : choice !== "both" ? (
-            <Link href={`/rooms/${suite.id}`} className="booking-suite-link">
-              View suite photos & details →
-            </Link>
-          ) : (
-            <Link href="/our-apartments" className="booking-suite-link">
-              Compare Unit A & Unit B →
-            </Link>
-          )}
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 }

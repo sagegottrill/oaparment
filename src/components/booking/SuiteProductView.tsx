@@ -6,7 +6,13 @@ import BookingPanel from "@/components/booking/BookingPanel";
 import SuiteTabs from "@/components/booking/SuiteTabs";
 import { formatNaira, suites, type SuiteProduct } from "@/lib/suites";
 
-export default function SuiteProductView({ suite }: { suite: SuiteProduct }) {
+export default function SuiteProductView({
+  suite,
+  bookable = true,
+}: {
+  suite: SuiteProduct;
+  bookable?: boolean;
+}) {
   const [activeImage, setActiveImage] = useState(suite.images[0] ?? "");
   const [showMobileBook, setShowMobileBook] = useState(false);
   const thumbs = suite.images.slice(0, 6);
@@ -43,16 +49,24 @@ export default function SuiteProductView({ suite }: { suite: SuiteProduct }) {
             <div>
               <h1 className="suite-title">{suite.title}</h1>
               <p className="suite-price-intro">
-                From <strong>{formatNaira(suite.pricePerNight)}</strong> / night · Up to {suite.maxGuests} guests
+                {bookable ? (
+                  <>
+                    From <strong>{formatNaira(suite.pricePerNight)}</strong> / night · Up to {suite.maxGuests} guests
+                  </>
+                ) : (
+                  <strong>Currently unavailable</strong>
+                )}
               </p>
             </div>
-            <button
-              type="button"
-              className="btn btn-primary suite-mobile-book-btn"
-              onClick={() => setShowMobileBook(true)}
-            >
-              Book this suite
-            </button>
+            {bookable ? (
+              <button
+                type="button"
+                className="btn btn-primary suite-mobile-book-btn"
+                onClick={() => setShowMobileBook(true)}
+              >
+                Book this suite
+              </button>
+            ) : null}
           </div>
         </div>
       </section>
@@ -84,19 +98,30 @@ export default function SuiteProductView({ suite }: { suite: SuiteProduct }) {
         </div>
 
         <aside className="suite-booking-rail">
-          <Suspense
-            fallback={
-              <div className="booking-panel is-embedded">
-                <p>Loading booking…</p>
-              </div>
-            }
-          >
-            <BookingPanel initialSuite={suite} embedded />
-          </Suspense>
+          {bookable ? (
+            <Suspense
+              fallback={
+                <div className="booking-panel is-embedded">
+                  <p>Loading booking…</p>
+                </div>
+              }
+            >
+              <BookingPanel initialSuite={suite} embedded />
+            </Suspense>
+          ) : (
+            <div className="booking-panel is-embedded">
+              <p className="form-error" style={{ margin: 0 }}>
+                This suite is hidden and cannot be booked right now.
+              </p>
+              <Link href="/book" className="btn btn-outline" style={{ marginTop: "1rem" }}>
+                See available suites
+              </Link>
+            </div>
+          )}
         </aside>
       </section>
 
-      {showMobileBook ? (
+      {bookable && showMobileBook ? (
         <div className="suite-mobile-sheet" role="dialog" aria-modal="true" aria-label="Book suite">
           <div className="suite-mobile-sheet-backdrop" onClick={() => setShowMobileBook(false)} />
           <div className="suite-mobile-sheet-panel">
@@ -113,15 +138,17 @@ export default function SuiteProductView({ suite }: { suite: SuiteProduct }) {
         </div>
       ) : null}
 
-      <div className="suite-mobile-bar">
-        <div>
-          <strong>{formatNaira(suite.pricePerNight)}</strong>
-          <span>/ night</span>
+      {bookable ? (
+        <div className="suite-mobile-bar">
+          <div>
+            <strong>{formatNaira(suite.pricePerNight)}</strong>
+            <span>/ night</span>
+          </div>
+          <button type="button" className="btn btn-primary" onClick={() => setShowMobileBook(true)}>
+            Select dates
+          </button>
         </div>
-        <button type="button" className="btn btn-primary" onClick={() => setShowMobileBook(true)}>
-          Select dates
-        </button>
-      </div>
+      ) : null}
     </main>
   );
 }

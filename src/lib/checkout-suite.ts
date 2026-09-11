@@ -69,6 +69,41 @@ export async function loadCheckoutSuite(
   };
 }
 
+/** Returns false when a suite is explicitly hidden in admin. Missing rows stay bookable. */
+export async function isSuiteActive(admin: AdminClient, suiteId: string) {
+  const catalog = getSuite(suiteId);
+  if (!catalog) return false;
+
+  const { data, error } = await admin
+    .from("suites")
+    .select("active")
+    .or(`id.eq.${catalog.id},slug.eq.${catalog.slug}`)
+    .maybeSingle();
+
+  if (error || !data) return true;
+  return data.active !== false;
+}
+
+export async function assertSuitesBookable(
+  admin: AdminClient,
+  input: { suiteId: string; rooms: number }
+): Promise<string | null> {
+  const needed = input.rooms >= 2 ? ["unit-a", "unit-b"] : [input.suiteId];
+  for (const suiteId of needed) {
+    const active = await isSuiteActive(admin, suiteId);
+    if (!active) {
+      const label =
+        needed.length > 1
+          ? suiteId === "unit-a"
+            ? "Unit A"
+            : "Unit B"
+          : "This suite";
+      return `${label} is hidden and cannot be booked right now.`;
+    }
+  }
+  return null;
+}
+
 function occupiesSuite(booking: { suite_id: string; rooms: number }, suiteId: string) {
   if (booking.rooms >= 2) return true;
   return booking.suite_id === suiteId;

@@ -35,7 +35,13 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       <aside className={open ? "admin-sidebar open" : "admin-sidebar"}>
         <div className="admin-brand">
           <Link href="/" aria-label="The O' Apartments home">
-            <Image src="/logo.png" alt="The O' Apartments" width={180} height={48} className="brand-logo" />
+            <Image
+              src="/logo.png"
+              alt="The O' Apartments"
+              width={160}
+              height={40}
+              className="admin-brand-logo"
+            />
           </Link>
         </div>
 

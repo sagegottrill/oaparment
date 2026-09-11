@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAppUrl, getFlutterwaveLogoUrl } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
-import { assertStayAvailable, loadCheckoutSuite } from "@/lib/checkout-suite";
+import { assertStayAvailable, assertSuitesBookable, loadCheckoutSuite } from "@/lib/checkout-suite";
 import { initializeFlutterwavePayment } from "@/lib/flutterwave";
 import { cautionFeeForStay, nightsBetween } from "@/lib/suites";
 
@@ -56,6 +56,11 @@ export async function POST(request: Request) {
     const guestEmail = (body.guestEmail ?? "").trim().toLowerCase();
     const guestPhone = (body.guestPhone ?? "").trim();
     const notes = (body.notes ?? "").trim() || null;
+
+    const hidden = await assertSuitesBookable(admin, { suiteId: suite.id, rooms });
+    if (hidden) {
+      return NextResponse.json({ error: hidden }, { status: 400 });
+    }
 
     if (!checkIn || !checkOut || nights < 1) {
       return NextResponse.json(
