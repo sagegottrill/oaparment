@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useEffect, useMemo, useState } from "react";
 import { BOOK_NOW_HREF } from "@/lib/booking";
 import { openFlutterwaveCheckout } from "@/lib/flutterwave-inline";
+import { KYC_ACCEPTED_MIME_TYPES, KYC_ID_TYPES, KYC_MAX_DOCUMENT_BYTES, isKycDocumentAccepted } from "@/lib/kyc";
 import { createClient } from "@/lib/supabase/client";
 import { cautionFeeForStay, formatNaira, getSuite, lastNightFromCheckout, nightsBetween } from "@/lib/suites";
 
@@ -37,6 +38,9 @@ function CheckoutContent() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [notes, setNotes] = useState("");
+  const [idType, setIdType] = useState<string>("");
+  const [idNumber, setIdNumber] = useState("");
+  const [idDocument, setIdDocument] = useState<File | null>(null);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -94,29 +98,34 @@ function CheckoutContent() {
       setError("Missing stay details. Please choose dates again.");
       return;
     }
+    if (!idType || !idNumber.trim() || !idDocument) {
+      setError("A valid government ID (number and document upload) is required to book.");
+      return;
+    }
     setLoading(true);
     setNotice("");
     setError("");
 
     try {
-      const response = await fetch("/api/checkout/initialize", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          suiteId: suite.id,
-          checkIn,
-          checkOut,
-          rooms,
-          adults,
-          children,
-          guestName: name,
-          guestEmail: email,
-          guestPhone: phone,
-          notes: bothSuites
-            ? [`Both suites (Unit A + Unit B)`, notes].filter(Boolean).join("\n")
-            : notes,
-        }),
-      });
+      const form = new FormData();
+      form.set("suiteId", suite.id);
+      form.set("checkIn", checkIn);
+      form.set("checkOut", checkOut);
+      form.set("rooms", String(rooms));
+      form.set("adults", String(adults));
+      form.set("children", String(children));
+      form.set("guestName", name);
+      form.set("guestEmail", email);
+      form.set("guestPhone", phone);
+      form.set(
+        "notes",
+        bothSuites ? [`Both suites (Unit A + Unit B)`, notes].filter(Boolean).join("\n") : notes
+      );
+      form.set("idType", idType);
+      form.set("idNumber", idNumber.trim());
+      form.set("idDocument", idDocument);
+
+      const response = await fetch("/api/checkout/initialize", { method: "POST", body: form });
 
       const payload = (await response.json()) as {
         paymentLink?: string;
@@ -245,6 +254,69 @@ function CheckoutContent() {
                   placeholder="Arrival time, preferences..."
                 />
               </label>
+              <div className="kyc-section">
+                <h3 style={{ margin: 0 }}>Identity verification (required)</h3>
+                <p style={{ margin: 0, fontSize: "0.9rem", color: "var(--color-text-muted)" }}>
+                  Nigerian regulations require every guest to provide a valid government-issued ID. Your booking is
+                  not blocked by our review — but the submission itself is compulsory.
+                </p>
+                <label>
+                  ID type
+                  <select
+                    className="input"
+                    name="idType"
+                    required
+                    value={idType}
+                    onChange={(event) => setIdType(event.target.value)}
+                  >
+                    <option value="" disabled>
+                      Select ID type…
+                    </option>
+                    {KYC_ID_TYPES.map((item) => (
+                      <option key={item.value} value={item.value}>
+                        {item.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  ID number
+                  <input
+                    className="input"
+                    name="idNumber"
+                    required
+                    value={idNumber}
+                    onChange={(event) => setIdNumber(event.target.value)}
+                    placeholder="Exactly as shown on the ID"
+                  />
+                </label>
+                <label>
+                  ID document (photo or PDF, max 5 MB)
+                  <input
+                    className="input"
+                    type="file"
+                    name="idDocument"
+                    required
+                    accept={KYC_ACCEPTED_MIME_TYPES.join(",")}
+                    onChange={(event) => {
+                      const file = event.target.files?.[0] ?? null;
+                      if (file && !isKycDocumentAccepted(file)) {
+                        setError(`“${file.name}” must be a JPG, PNG, WebP, or PDF under ${Math.round(KYC_MAX_DOCUMENT_BYTES / (1024 * 1024))} MB.`);
+                        event.target.value = "";
+                        setIdDocument(null);
+                        return;
+                      }
+                      setError("");
+                      setIdDocument(file);
+                    }}
+                  />
+                </label>
+                {idDocument ? (
+                  <p className="form-success" style={{ margin: 0 }}>
+                    Attached: {idDocument.name}
+                  </p>
+                ) : null}
+              </div>
               <button className="btn btn-primary" type="submit" disabled={loading}>
                 {loading ? "Opening Flutterwave…" : `Pay ${formatNaira(total)}`}
               </button>

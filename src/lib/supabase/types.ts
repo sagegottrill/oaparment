@@ -1,6 +1,8 @@
 export type UserRole = "guest" | "admin";
 export type BookingStatus = "pending" | "confirmed" | "cancelled" | "completed";
 export type PaymentStatus = "unpaid" | "pending" | "paid" | "failed" | "refunded";
+export type KycIdType = "nin" | "passport" | "drivers_licence";
+export type KycStatus = "pending" | "approved" | "rejected";
 
 export type Profile = {
   id: string;
@@ -52,6 +54,27 @@ export type Booking = {
   updated_at: string;
 };
 
+export type KycSubmission = {
+  id: string;
+  booking_id: string | null;
+  user_id: string | null;
+  guest_email: string;
+  guest_name: string;
+  guest_phone: string | null;
+  id_type: KycIdType;
+  id_number: string;
+  id_document_path: string | null;
+  id_document_name: string | null;
+  id_document_type: string | null;
+  id_document_size: number | null;
+  status: KycStatus;
+  review_note: string | null;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -65,6 +88,31 @@ export type Database = {
         Row: Suite;
         Insert: Partial<Suite> & { id: string; slug: string; title: string };
         Update: Partial<Suite>;
+        Relationships: [];
+      };
+      kyc_submissions: {
+        Row: KycSubmission;
+        Insert: {
+          id?: string;
+          booking_id?: string | null;
+          user_id?: string | null;
+          guest_email: string;
+          guest_name: string;
+          guest_phone?: string | null;
+          id_type: KycIdType;
+          id_number: string;
+          id_document_path?: string | null;
+          id_document_name?: string | null;
+          id_document_type?: string | null;
+          id_document_size?: number | null;
+          status?: KycStatus;
+          review_note?: string | null;
+          reviewed_by?: string | null;
+          reviewed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<KycSubmission>;
         Relationships: [];
       };
       bookings: {

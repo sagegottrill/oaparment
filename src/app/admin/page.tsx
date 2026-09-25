@@ -29,13 +29,23 @@ export default async function AdminDashboardPage() {
   const { data: suites } = await supabase.from("suites").select("id, active");
   const activeSuites = (suites ?? []).filter((suite) => suite.active).length;
 
+  const { count: pendingKyc } = await supabase
+    .from("kyc_submissions")
+    .select("*", { count: "exact", head: true })
+    .eq("status", "pending");
+
   return (
     <div>
       <div className="admin-page-head">
         <h1>Dashboard</h1>
-        <Link href="/admin/bookings" className="btn btn-outline btn-compact">
-          Manage bookings
-        </Link>
+        <div className="flex gap-sm">
+          <Link href="/admin/kyc" className="btn btn-primary btn-compact">
+            Review KYC {pendingKyc ? `(${pendingKyc})` : ""}
+          </Link>
+          <Link href="/admin/bookings" className="btn btn-outline btn-compact">
+            Manage bookings
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-md" style={{ marginBottom: "var(--spacing-2xl)" }}>
@@ -52,6 +62,19 @@ export default async function AdminDashboardPage() {
           <p>{activeSuites}</p>
         </div>
       </div>
+
+      {pendingKyc ? (
+        <div className="card admin-panel" style={{ marginBottom: "var(--spacing-2xl)", borderColor: "var(--color-primary)" }}>
+          <div className="flex justify-between items-center">
+            <p style={{ margin: 0 }}>
+              <strong>{pendingKyc}</strong> guest ID submission{pendingKyc === 1 ? "" : "s"} awaiting review.
+            </p>
+            <Link href="/admin/kyc" className="btn btn-primary btn-compact">
+              Review now
+            </Link>
+          </div>
+        </div>
+      ) : null}
 
       <div className="card admin-panel">
         <div className="admin-page-head" style={{ marginBottom: "var(--spacing-md)" }}>

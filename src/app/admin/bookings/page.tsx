@@ -11,17 +11,25 @@ export default function AdminBookingsPage() {
   const [query, setQuery] = useState("");
   const [error, setError] = useState("");
   const [pending, startTransition] = useTransition();
+  const [kycByBooking, setKycByBooking] = useState<Map<string, { status: string; id: string }>>(new Map());
 
   async function load() {
     setLoading(true);
     const supabase = createClient();
-    const { data, error: loadError } = await supabase
-      .from("bookings")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const [{ data, error: loadError }, { data: kycRows }] = await Promise.all([
+      supabase.from("bookings").select("*").order("created_at", { ascending: false }),
+      supabase.from("kyc_submissions").select("id, booking_id, status, guest_email"),
+    ]);
 
     if (loadError) setError(loadError.message);
     else setBookings(data ?? []);
+    if (kycRows) {
+      const byBooking = new Map<string, { status: string; id: string }>();
+      for (const row of kycRows) {
+        if (row.booking_id) byBooking.set(row.booking_id, { status: row.status, id: row.id });
+      }
+      setKycByBooking(byBooking);
+    }
     setLoading(false);
   }
 
@@ -47,7 +55,9 @@ export default function AdminBookingsPage() {
   }
 
   const filtered = bookings.filter((booking) => {
-    const haystack = `${booking.guest_name} ${booking.guest_email} ${booking.suite_id} ${booking.status}`.toLowerCase();
+    const kyc = kycByBooking.get(booking.id);
+    const haystack =
+      `${booking.guest_name} ${booking.guest_email} ${booking.suite_id} ${booking.status} ${kyc ? kyc.status : ""}`.toLowerCase();
     return haystack.includes(query.toLowerCase());
   });
 
@@ -78,13 +88,14 @@ export default function AdminBookingsPage() {
                   <th>Dates</th>
                   <th>Amount</th>
                   <th>Status</th>
+                  <th>KYC</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={7}>No bookings found.</td>
+                    <td colSpan={8}>No bookings found.</td>
                   </tr>
                 ) : (
                   filtered.map((booking) => (
@@ -110,6 +121,19 @@ export default function AdminBookingsPage() {
                         </span>
                         <br />
                         <small>{booking.payment_status}</small>
+                      </td>
+                      <td>
+                        {(() => {
+                          const kyc = kycByBooking.get(booking.id);
+                          if (!kyc) return <small>No ID submitted</small>;
+                          const label =
+                            kyc.status === "approved"
+                              ? "Verified"
+                              : kyc.status === "rejected"
+                                ? "Rejected"
+                                : "Pending";
+                          return <span className={`status-pill status-${kyc.status === "approved" ? "confirmed" : kyc.status === "rejected" ? "cancelled" : "pending"}`}>{label}</span>;
+                        })()}
                       </td>
                       <td>
                         <div className="flex gap-sm" style={{ flexWrap: "wrap" }}>
