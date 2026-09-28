@@ -2466,18 +2466,12 @@ textarea.input:focus {
   gap: var(--spacing-md);
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-  padding-bottom: 0.5rem;
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-primary) transparent;
+  padding-bottom: 0.25rem;
+  scrollbar-width: none;
 }
 
 .testimonial-track::-webkit-scrollbar {
-  height: 6px;
-}
-
-.testimonial-track::-webkit-scrollbar-thumb {
-  background: var(--color-primary);
-  border-radius: 999px;
+  display: none;
 }
 
 .testimonial-card {
