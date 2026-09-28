@@ -44,6 +44,31 @@ const testimonials = [
     quote:
       "I absolutely loved my time at O’Apartment. The apartment was bright, clean, and very comfortable. I appreciated the fast Wi-Fi and the thoughtful setup. It honestly felt like home. The location was also great, close to everything I needed during my short visit.",
   },
+  {
+    name: "Opeyemi Agbebi",
+    quote:
+      "I visited Ilaro for a business trip and stayed at O’Apartment for three nights. I came across the apartment through their social media and decided to give it a try, and honestly, it exceeded my expectations. The environment was very peaceful and comfortable, and it genuinely felt like a home away from home. I particularly appreciated the 24/7 power supply, the cleanliness of the apartment, and how close it is to Federal Polytechnic, Ilaro. The cleaning service was also impressive and consistent throughout my stay. Everything was well organised, and I had a really comfortable experience. I would definitely consider staying here again whenever I’m in Ilaro.",
+  },
+  {
+    name: "Anthony Okpala",
+    quote:
+      "I had a very comfortable stay at O’Apartment. One thing I really appreciated was the attention given to security. The apartment felt safe and secure throughout my stay, and the existing security measures gave me peace of mind. I would only suggest adding physical security personnel to the existing security arrangements, as I believe this would provide an additional level of comfort for guests, especially those staying for several days or arriving late. Beyond that, the apartment was clean, peaceful and well maintained. The staff were also helpful, and I had a pleasant experience overall. I would definitely consider staying here again.",
+  },
+  {
+    name: "Otaigbe Imadegbelo",
+    quote:
+      "My stay at O’Apartment was a really good experience. What I enjoyed most was that the apartment actually had the feel of a proper home rather than just a place to sleep. The sitting room was comfortable, and the kitchen had the basic utensils and facilities I needed during my stay. The apartment was neat and well arranged, and having a reliable power supply made everything even more convenient. I also liked the quiet environment, especially after a busy day. It was easy to settle in and feel comfortable. I had a good stay and would gladly recommend O’Apartment to anyone visiting Ilaro.",
+  },
+  {
+    name: "Temidayo Adegoroye",
+    quote:
+      "I really enjoyed my stay at O’Apartment. The apartment was clean, comfortable and well organised, and I particularly appreciated having Wi-Fi available during my stay. It made it easy for me to stay connected and attend to some of my work while I was there. The sitting area was also comfortable, and the overall environment was peaceful. The location is convenient, especially for anyone who needs to be around Federal Polytechnic, Ilaro. The cleaning service was also good, and everything was kept in good condition. It was a pleasant stay, and I would definitely come back.",
+  },
+  {
+    name: "Oluwasonmi Ogbonnaiye",
+    quote:
+      "I had a very pleasant experience staying at O’Apartment. The apartment was spacious, neat and comfortable, and I liked how everything was arranged to make the stay convenient. The bedroom was comfortable, the sitting room was a nice place to relax, and the apartment generally had a warm and homely feel. The environment was also quiet, which I really appreciated. The cleaning was well done, and the 24/7 electricity was another advantage. I also found the location convenient for getting around Ilaro. Overall, I enjoyed my stay and would recommend O’Apartment to anyone looking for a comfortable short-term stay.",
+  },
 ] as const;
 
 export default function Home() {
