@@ -2454,3 +2454,117 @@ textarea.input:focus {
     height: 200px;
   }
 }
+
+/* ---------- Testimonial carousel ---------- */
+
+.testimonial-carousel {
+  position: relative;
+}
+
+.testimonial-track {
+  display: flex;
+  gap: var(--spacing-md);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 0.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-primary) transparent;
+}
+
+.testimonial-track::-webkit-scrollbar {
+  height: 6px;
+}
+
+.testimonial-track::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 999px;
+}
+
+.testimonial-card {
+  flex: 0 0 min(420px, 86vw);
+  scroll-snap-align: start;
+  padding: clamp(1.35rem, 3vw, 1.85rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.testimonial-card p {
+  margin: 0;
+  line-height: 1.7;
+}
+
+.testimonial-stars {
+  color: var(--color-primary-dark);
+  letter-spacing: 2px;
+}
+
+.testimonial-card h4 {
+  margin: 0;
+}
+
+.testimonial-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface, #fff);
+  color: var(--color-text);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  display: grid;
+  place-items: center;
+}
+
+.testimonial-arrow:hover {
+  background: var(--color-primary);
+  color: var(--color-text-light, #fff);
+  border-color: var(--color-primary);
+}
+
+.testimonial-arrow-prev {
+  left: -0.75rem;
+}
+
+.testimonial-arrow-next {
+  right: -0.75rem;
+}
+
+.testimonial-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.45rem;
+  margin-top: var(--spacing-md);
+}
+
+.testimonial-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  border: 0;
+  padding: 0;
+  background: var(--color-border);
+  cursor: pointer;
+  transition: width 0.25s ease, background 0.25s ease;
+}
+
+.testimonial-dot.active {
+  background: var(--color-primary);
+  width: 22px;
+}
+
+@media (max-width: 640px) {
+  .testimonial-arrow {
+    display: none;
+  }
+
+  .testimonial-card {
+    flex-basis: 86vw;
+  }
+}

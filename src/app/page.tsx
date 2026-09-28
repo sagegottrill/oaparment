@@ -1,5 +1,6 @@
 import Link from "next/link";
 import HomeHeroCarousel from "@/components/home/HomeHeroCarousel";
+import TestimonialCarousel from "@/components/home/TestimonialCarousel";
 import { apt } from "@/lib/apartment-images";
 import { BOOK_NOW_HREF } from "@/lib/booking";
 
@@ -366,15 +367,7 @@ export default function Home() {
             <p>Our guests checked in, checked out, and had plenty to say.</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-xl">
-            {testimonials.map((item) => (
-              <div key={item.name} className="card home-testimonial-card">
-                <p>“{item.quote}”</p>
-                <div style={{ color: "var(--color-primary-dark)", marginBottom: "var(--spacing-sm)" }}>★★★★★</div>
-                <h4 style={{ margin: 0 }}>{item.name}</h4>
-              </div>
-            ))}
-          </div>
+          <TestimonialCarousel testimonials={testimonials} />
         </div>
       </section>
     </main>
