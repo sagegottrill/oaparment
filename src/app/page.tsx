@@ -25,11 +25,7 @@ const features = [
 ] as const;
 
 const testimonials = [
-  {
-    name: "Tunde Adeyemi",
-    quote:
-      "My stay at O’Apartment was perfect. The room felt fresh and welcoming, and the décor was beautiful. I loved how quiet the place was, and the bed was really comfortable. Everything I needed was right there, and checking in was super easy and smooth.",
-  },
+
   {
     name: "Opeyemi Agbebi",
     quote:
