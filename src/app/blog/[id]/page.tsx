@@ -35,11 +35,27 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
             marginBottom: "var(--spacing-xl)",
           }}
         />
-        {post.body.map((paragraph) => (
-          <p key={paragraph.slice(0, 40)} style={{ fontSize: "1.05rem", marginBottom: "var(--spacing-md)" }}>
-            {paragraph}
-          </p>
-        ))}
+        {post.body.map((item, index) => {
+          if (typeof item === 'string') {
+            return (
+              <p key={index} style={{ fontSize: "1.05rem", marginBottom: "var(--spacing-md)" }}>
+                {item}
+              </p>
+            );
+          }
+          if (item.type === 'image') {
+            return (
+              <div key={index} style={{ margin: "var(--spacing-xl) 0" }}>
+                <img 
+                  src={item.src} 
+                  alt={item.alt || ""} 
+                  style={{ width: "100%", borderRadius: "var(--radius-md)", objectFit: "cover", maxHeight: "500px" }} 
+                />
+              </div>
+            );
+          }
+          return null;
+        })}
 
         <div className="flex gap-md" style={{ flexWrap: "wrap", marginTop: "var(--spacing-xl)" }}>
           <Link href={BOOK_NOW_HREF} className="btn btn-primary">

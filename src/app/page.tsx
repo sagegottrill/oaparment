@@ -31,21 +31,6 @@ const testimonials = [
       "My stay at O’Apartment was perfect. The room felt fresh and welcoming, and the décor was beautiful. I loved how quiet the place was, and the bed was really comfortable. Everything I needed was right there, and checking in was super easy and smooth.",
   },
   {
-    name: "Grace O.",
-    quote:
-      "I booked this shortlet during my trip, and honestly, it felt like a home away from home. The place was spotless, and way better than I expected for the price. The host was super friendly and responsive too. I’ll definitely stay here again whenever I’m back! totally worth it",
-  },
-  {
-    name: "Chinedu Okafor",
-    quote:
-      "I had an amazing stay at O’Apartment. The place was super clean, cozy, and exactly like the pictures. The host was friendly and always available. Everything worked perfectly, from the Wi-Fi to the air conditioning. I’d definitely come back again and recommend it to friends.",
-  },
-  {
-    name: "Aisha Bello",
-    quote:
-      "I absolutely loved my time at O’Apartment. The apartment was bright, clean, and very comfortable. I appreciated the fast Wi-Fi and the thoughtful setup. It honestly felt like home. The location was also great, close to everything I needed during my short visit.",
-  },
-  {
     name: "Opeyemi Agbebi",
     quote:
       "I visited Ilaro for a business trip and stayed at O’Apartment for three nights. I came across the apartment through their social media and decided to give it a try, and honestly, it exceeded my expectations. The environment was very peaceful and comfortable, and it genuinely felt like a home away from home. I particularly appreciated the 24/7 power supply, the cleanliness of the apartment, and how close it is to Federal Polytechnic, Ilaro. The cleaning service was also impressive and consistent throughout my stay. Everything was well organised, and I had a really comfortable experience. I would definitely consider staying here again whenever I’m in Ilaro.",
