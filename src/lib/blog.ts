@@ -1,5 +1,13 @@
 import { apt } from "@/lib/apartment-images";
 
+export type BlogBlock =
+  | string
+  | { type: "h2"; text: string }
+  | { type: "h3"; text: string }
+  | { type: "p"; text: string }
+  | { type: "list"; items: string[] }
+  | { type: "image"; src: string; alt?: string };
+
 export type BlogPost = {
   id: string;
   category: string;
@@ -8,7 +16,7 @@ export type BlogPost = {
   author: string;
   excerpt: string;
   image: string;
-  body: (string | { type: "image"; src: string; alt?: string })[];
+  body: BlogBlock[];
 };
 
 export const blogPosts: BlogPost[] = [
@@ -18,77 +26,141 @@ export const blogPosts: BlogPost[] = [
     title: "Best Shortlet in Ilaro: Why The O’ Apartments Is a Top Choice for Your Stay",
     date: "October 6, 2026",
     author: "The O' Apartments",
-    excerpt: "Finding the best shortlet in Ilaro can make a big difference to your experience, whether you are visiting for business, attending an event, spending time with family, or simply looking for a comfortable place to stay in Ogun State.",
+    excerpt:
+      "Finding the best shortlet in Ilaro can make a big difference to your experience, whether you are visiting for business, attending an event, spending time with family, or simply looking for a comfortable place to stay in Ogun State.",
     image: apt.exterior1,
     body: [
       "Finding the best shortlet in Ilaro can make a big difference to your experience, whether you are visiting for business, attending an event, spending time with family, or simply looking for a comfortable place to stay in Ogun State.",
       "While hotels remain a popular accommodation option in Ilaro, a well-equipped shortlet apartment gives you something different more privacy, more space, a home-like environment, and the flexibility to settle in comfortably during your stay.",
-      "For travellers looking for a premium short-stay apartment in Ilaro, The O’ Apartments offers two fully furnished 3-bedroom ensuite suites designed around comfort, convenience, privacy, and modern living.",
-      "What makes a good shortlet in Ilaro?",
+      "For travellers looking for a premium short-stay apartment in Ilaro, [The O’ Apartments](/) offers two fully furnished 3-bedroom ensuite suites designed around comfort, convenience, privacy, and modern living.",
+
+      { type: "h2", text: "What makes a good shortlet in Ilaro?" },
       "Before choosing a shortlet apartment, look beyond attractive pictures.",
       "The best shortlet should provide the essentials for a convenient, stress-free stay. These include:",
-      "• A comfortable and well-maintained living space\n• Private bedrooms and bathrooms\n• Reliable electricity\n• Fast internet access\n• Air conditioning\n• A functional kitchen\n• Secure parking\n• A convenient location\n• A simple booking process\n• Enough space for families, groups, or professionals",
+      {
+        type: "list",
+        items: [
+          "A comfortable and well-maintained living space",
+          "Private bedrooms and bathrooms",
+          "Reliable electricity",
+          "Fast internet access",
+          "Air conditioning",
+          "A functional kitchen",
+          "Secure parking",
+          "A convenient location",
+          "A simple booking process",
+          "Enough space for families, groups, or professionals",
+        ],
+      },
       "These features become particularly important when you are staying for several nights or travelling with other people.",
       "This is where an apartment can have an advantage over a conventional hotel room.",
+
       { type: "image", src: apt.exterior4, alt: "The O' Apartments Courtyard" },
-      "The O’ Apartments: A premium shortlet in Ilaro",
+
+      { type: "h2", text: "The O’ Apartments: A premium shortlet in Ilaro" },
       "The O’ Apartments is a short-stay accommodation located at 3 Tunji Otegbeye Street, Ona Egbo, Ilaro, Ogun State.",
       "The property consists of two separate, fully furnished 3-bedroom ensuite apartments, giving guests the option of booking one suite or both suites depending on their needs. Each unit accommodates up to six guests.",
       "For larger groups, both apartments can be booked together, providing accommodation for up to 12 guests or more as agreed with the management.",
-      "This makes The O’ Apartments particularly suitable for families, groups of friends, professionals, and guests who prefer having an entire apartment rather than staying in separate hotel rooms.",
-      "1. Spacious 3-bedroom ensuite suites",
-      "One of the biggest advantages of The O’ Apartments is the amount of space available. Each unit is a 3-bedroom premium suite, with private ensuite bathrooms. This gives guests more room to relax, work, eat, and spend time together without feeling restricted to a single hotel room.",
+      "This makes [The O’ Apartments](/) particularly suitable for families, groups of friends, professionals, and guests who prefer having an entire apartment rather than staying in separate hotel rooms.",
+
+      { type: "h3", text: "1. Spacious 3-bedroom ensuite suites" },
+      "One of the biggest advantages of [The O’ Apartments](/) is the amount of space available. Each unit is a 3-bedroom premium suite, with private ensuite bathrooms. This gives guests more room to relax, work, eat, and spend time together without feeling restricted to a single hotel room.",
       "For families travelling together, this can be particularly convenient because everyone can stay under one roof while still having their own bedroom. It also works well for groups visiting Ilaro for events, business activities, family occasions, or extended stays.",
+
       { type: "image", src: apt.bedroom10, alt: "Spacious ensuite bedroom" },
-      "2. Comforts designed for a home away from home",
+
+      { type: "h3", text: "2. Comforts designed for a home away from home" },
       "A shortlet should feel comfortable enough that you do not constantly feel like you are away from home.",
-      "The O’ Apartments combines the privacy of an apartment with amenities designed for a convenient stay.",
+      "[The O’ Apartments](/) combines the privacy of an apartment with amenities designed for a convenient stay.",
       "Guests have access to amenities including:",
-      "• Air conditioning\n• 24/7 solar power\n• Fast, free Wi-Fi\n• CCTV security\n• Fully fitted kitchen\n• Indoor games\n• Entertainment system\n• Spacious parking",
+      {
+        type: "list",
+        items: [
+          "Air conditioning",
+          "24/7 solar power",
+          "Fast, free Wi-Fi",
+          "CCTV security",
+          "Fully fitted kitchen",
+          "Indoor games",
+          "Entertainment system",
+          "Spacious parking",
+        ],
+      },
       "These facilities are designed to make everyday living easier during your stay.",
       "Whether you need Wi-Fi to work remotely, reliable power to stay connected, or a kitchen for preparing meals, having these facilities available can make a short stay considerably more convenient.",
-      "3. A convenient location in Ilaro",
-      "Location matters when choosing accommodation. The O’ Apartments is located in Ona Egbo, Ilaro, with access to major roads, shopping centres, banks, eateries, and other important locations within the town like Federal Polytechnic, Ilaro. It is also close to the Dangote Cement Factory, making the apartment a practical option for professionals and visitors whose activities take them around that area.",
+
+      { type: "h3", text: "3. A convenient location in Ilaro" },
+      "Location matters when choosing accommodation. [The O’ Apartments](/) is located in Ona Egbo, Ilaro, with access to major roads, shopping centres, banks, eateries, and other important locations within the town like Federal Polytechnic, Ilaro. It is also close to the Dangote Cement Factory, making the apartment a practical option for professionals and visitors whose activities take them around that area.",
       "The location can also be convenient for people visiting Ilaro for personal reasons, events, school-related activities, or business. Instead of choosing accommodation based only on the room itself, consider how easily you can get to the places you need to visit.",
-      "4. A better option for families and groups",
+
+      { type: "h3", text: "4. A better option for families and groups" },
       "If you are travelling alone, a hotel room may be enough. But when you are travelling with family or a group, having an entire apartment can make the experience easier.",
-      "The O’ Apartments provide three bedrooms in each suite, with each unit accommodating up to six guests. For larger groups, both suites can be reserved together for up to 12 guests or more.",
+      "[The O’ Apartments](/) provides three bedrooms in each suite, with each unit accommodating up to six guests. For larger groups, both suites can be reserved together for up to 12 guests or more.",
       "This gives groups a shared living environment while providing separate bedrooms for privacy.",
-      "It can be useful for:\n• Family trips\n• Group visits\n• Wedding and event guests\n• Business trips\n• Professionals visiting Ilaro\n• Friends travelling together\n• Longer short-term stays",
+      "It can be useful for:",
+      {
+        type: "list",
+        items: [
+          "Family trips",
+          "Group visits",
+          "Wedding and event guests",
+          "Business trips",
+          "Professionals visiting Ilaro",
+          "Friends travelling together",
+          "Longer short-term stays",
+        ],
+      },
+
       { type: "image", src: apt.living5, alt: "Living room and dining area" },
-      "5. Suitable for business and work trips",
+
+      { type: "h3", text: "5. Suitable for business and work trips" },
       "Ilaro attracts visitors for more than tourism. Professionals may visit the town for meetings, projects, business activities, work assignments, or activities connected to nearby businesses and institutions.",
       "For these guests, accommodation needs to provide more than a bed.",
-      "The O’ Apartments offers fast, free Wi-Fi, reliable power through its solar power system, a comfortable living area, and air conditioning, making it suitable for guests who need to stay connected and productive during their visit.",
+      "[The O’ Apartments](/) offers fast, free Wi-Fi, reliable power through its solar power system, a comfortable living area, and air conditioning, making it suitable for guests who need to stay connected and productive during their visit.",
       "Having a proper living space can also make longer business stays more comfortable than spending several nights in a conventional hotel room.",
-      "6. Fully furnished for a comfortable stay",
+
+      { type: "h3", text: "6. Fully furnished for a comfortable stay" },
       "A major advantage of choosing a serviced shortlet is being able to move into a space that is already furnished and equipped for everyday living.",
-      "The O’ Apartments features furnished living areas, comfortable bedrooms, wardrobes, bathrooms, air conditioning, Smart TV entertainment, and an open-plan dining area.",
+      "[The O’ Apartments](/) features furnished living areas, comfortable bedrooms, wardrobes, bathrooms, air conditioning, Smart TV entertainment, and an open-plan dining area.",
       "The goal is simple: give guests a space where they can arrive, settle in, and enjoy their stay without worrying about the basics.",
-      "7. Flexible booking for different group sizes",
+
+      { type: "h3", text: "7. Flexible booking for different group sizes" },
       "Not every traveller has the same accommodation needs. A couple or small family may only need one apartment, while a larger family or group may require both.",
-      "The O’ Apartments allows guests to choose between Unit A, Unit B, or both suites when making a reservation. Each individual suite is listed at ₦150,000 per night for up to six guests, while both suites can accommodate up to 12 guests or more.",
-      "Because availability can change, guests should check the official booking page for their preferred dates before making travel plans.",
-      "The O’ Apartments vs. a traditional hotel in Ilaro",
+      "[The O’ Apartments](/) allows guests to choose between Unit A, Unit B, or both suites when making a reservation. Each individual suite is listed at ₦150,000 per night for up to six guests, while both suites can accommodate up to 12 guests or more.",
+      "Because availability can change, guests should check the [official booking page](/book) for their preferred dates before making travel plans.",
+
+      { type: "h2", text: "The O’ Apartments vs. a traditional hotel in Ilaro" },
       "The right accommodation ultimately depends on what you need. A hotel may be ideal if you only need a basic room for a short overnight stay.",
       "A serviced apartment may be a better option if you want more space, privacy, kitchen facilities, multiple bedrooms, and a home-like environment.",
-      "The O’ Apartments is designed specifically for guests who want that combination of hotel-style comfort and the privacy of a home.",
+      "[The O’ Apartments](/) is designed specifically for guests who want that combination of hotel-style comfort and the privacy of a home.",
       "With two 3-bedroom ensuite suites, modern amenities, parking, Wi-Fi, reliable power, and a convenient Ilaro location, it offers an alternative to the traditional hotel experience.",
+
       { type: "image", src: apt.dining1, alt: "Dining table and chairs" },
-      "Frequently Asked Questions About Shortlets in Ilaro",
-      "What is the best shortlet in Ilaro?\nThe O’ Apartments is the best shortlet in Ilaro. It offers two fully furnished ensuite suites, modern amenities, private living spaces, and accommodation for up to six guests per unit.",
-      "How much is a shortlet in Ilaro?\nShortlet prices in Ilaro vary depending on the property and facilities. The O’ Apartments currently lists its 3-bedroom premium suites from ₦150,000 per night. Check the official booking page for current prices and availability.",
-      "Where can I find a 3-bedroom apartment in Ilaro?\nThe O’ Apartments has two fully furnished 3-bedroom ensuite suites at 3 Tunji Otegbeye Street, Ona Egbo, Ilaro, Ogun State. Each unit can accommodate up to six guests.",
-      "Is the O’ Apartments suitable for families?\nYes. The three-bedroom layout, private ensuite bathrooms, living area, kitchen, and other home-style facilities make it suitable for families looking for a comfortable stay in Ilaro.",
-      "Can I book a shortlet in Ilaro for a group?\nYes. The O’ Apartments allows guests to reserve one suite for up to six guests or both suites for groups of up to 12 guests or more.",
-      "Is there reliable electricity at The O’ Apartments?\nThe property advertises 24/7 solar power as one of its facilities, helping guests stay comfortable and connected during their visit.",
-      "Does The O’ Apartments have Wi-Fi?\nYes. Fast, free Wi-Fi is listed among the property's amenities.",
-      "Where is The O’ Apartments located?\nThe O’ Apartments is located at 3 Tunji Otegbeye Street, Ona Egbo, Ilaro, Ogun State, Nigeria.",
-      "Book Your Stay at The O’ Apartments",
+
+      { type: "h2", text: "Frequently Asked Questions About Shortlets in Ilaro" },
+      { type: "h3", text: "What is the best shortlet in Ilaro?" },
+      "[The O’ Apartments](/) is the best shortlet in Ilaro. It offers two fully furnished ensuite suites, modern amenities, private living spaces, and accommodation for up to six guests per unit.",
+      { type: "h3", text: "How much is a shortlet in Ilaro?" },
+      "Shortlet prices in Ilaro vary depending on the property and facilities. [The O’ Apartments](/) currently lists its 3-bedroom premium suites from ₦150,000 per night. Check the [official booking page](/book) for current prices and availability.",
+      { type: "h3", text: "Where can I find a 3-bedroom apartment in Ilaro?" },
+      "[The O’ Apartments](/) has two fully furnished 3-bedroom ensuite suites at 3 Tunji Otegbeye Street, Ona Egbo, Ilaro, Ogun State. Each unit can accommodate up to six guests.",
+      { type: "h3", text: "Is the O’ Apartments suitable for families?" },
+      "Yes. The three-bedroom layout, private ensuite bathrooms, living area, kitchen, and other home-style facilities make it suitable for families looking for a comfortable stay in Ilaro.",
+      { type: "h3", text: "Can I book a shortlet in Ilaro for a group?" },
+      "Yes. [The O’ Apartments](/) allows guests to reserve one suite for up to six guests or both suites for groups of up to 12 guests or more.",
+      { type: "h3", text: "Is there reliable electricity at The O’ Apartments?" },
+      "The property advertises 24/7 solar power as one of its facilities, helping guests stay comfortable and connected during their visit.",
+      { type: "h3", text: "Does The O’ Apartments have Wi-Fi?" },
+      "Yes. Fast, free Wi-Fi is listed among the property's amenities.",
+      { type: "h3", text: "Where is The O’ Apartments located?" },
+      "[The O’ Apartments](/) is located at 3 Tunji Otegbeye Street, Ona Egbo, Ilaro, Ogun State, Nigeria.",
+
+      { type: "h2", text: "Book Your Stay at The O’ Apartments" },
       "Choosing accommodation is about more than finding somewhere to sleep. The right shortlet should give you the space, comfort, privacy, convenience, and facilities you need to enjoy your time in Ilaro.",
-      "With two premium 3-bedroom ensuite apartments, modern amenities, reliable power, Wi-Fi, secure parking, and a convenient location, The O’ Apartments offers a comfortable short-stay option for families, professionals, groups, and visitors looking for quality accommodation in Ilaro.",
-      "If you are planning your next trip to Ilaro and want a private apartment that feels like home while giving you the comfort of a premium stay, The O’ Apartments is ready to welcome you."
-    ]
+      "With two premium 3-bedroom ensuite apartments, modern amenities, reliable power, Wi-Fi, secure parking, and a convenient location, [The O’ Apartments](/) offers a comfortable short-stay option for families, professionals, groups, and visitors looking for quality accommodation in Ilaro.",
+      "If you are planning your next trip to Ilaro and want a private apartment that feels like home while giving you the comfort of a premium stay, [The O’ Apartments](/) is ready to welcome you.",
+      "Check availability and book your stay directly through [The O’ Apartments official website](/).",
+    ],
   },
   {
     id: "5-things-to-do-in-ilaro",
@@ -96,53 +168,75 @@ export const blogPosts: BlogPost[] = [
     title: "5 things to do in Ilaro, Ogun State",
     date: "October 6, 2026",
     author: "The O' Apartments",
-    excerpt: "Discover the best things to do in Ilaro, Ogun State, from cultural sites and festivals to local food, markets, and places to explore.",
+    excerpt:
+      "Discover the best things to do in Ilaro, Ogun State, from cultural sites and festivals to local food, markets, and places to explore.",
     image: apt.exteriorNight,
     body: [
       "Planning a visit to Ilaro, Ogun State and wondering what to do while you are there?",
       "Ilaro is an ancient town in Yewaland with a rich Yoruba heritage, traditional festivals, local markets, educational institutions, and a strong community culture. Whether you are visiting for a weekend, a family event, business, school-related activities, or simply want to explore the town, there are a few experiences worth adding to your itinerary.",
-      "Here are 5 things to do in Ilaro during your visit.",
-      "1. Visit the Oronna Shrine",
+
+      { type: "h2", text: "Here are 5 things to do in Ilaro during your visit:" },
+
+      { type: "h3", text: "1. Visit the Oronna Shrine" },
       "One of the most significant cultural landmarks in Ilaro is the Oronna Shrine, associated with Oronna, a legendary warrior and protector of the town.",
       "According to local history, Oronna played a major role in defending Ilaro from invading forces. His story remains an important part of the town's cultural identity, and the place associated with his disappearance is now known as the Oronna Shrine.",
       "For visitors interested in history, Yoruba traditions, and local culture, the shrine offers an opportunity to learn more about the story behind one of Ilaro's most important historical figures.",
-      "2. Visit the Olu of Ilaro's Palace",
+
+      { type: "h3", text: "2. Visit the Olu of Ilaro's Palace" },
       "The traditional institution of Ilaro is another important part of the town's identity.",
       "The Olu of Ilaro and Paramount Ruler of Yewaland is an important traditional authority in the region, and the palace is associated with the traditional leadership and history of Ilaro and Yewaland.",
       "Visitors interested in the history and traditional governance of Yewaland can learn more about the role of the traditional institution and its place in the community.",
       "When planning a visit, it is advisable to confirm visitor access and any local protocols before going to the palace.",
-      "3. Experience the Oronna Ilaro Festival",
+
+      { type: "h3", text: "3. Experience the Oronna Ilaro Festival" },
       "If you want to experience Ilaro at its most vibrant, consider visiting during the Oronna Ilaro Festival.",
       "The annual week-long celebration honours Oronna and brings together cultural, social, educational and entertainment activities. It is also described by the festival organisers as the official annual homecoming of the people of Ilaro.",
       "Visitors are welcome to attend and experience the culture, food, hospitality and traditions of Ilaro and Yewaland.",
       "The 2026 Oronna Ilaro Festival is scheduled for November 14 to 21, 2026, so visitors planning a trip around the celebration should consider arranging accommodation early.",
-      "4. Explore Ilaro's Yoruba Cultural Heritage",
+
+      { type: "h3", text: "4. Explore Ilaro's Yoruba Cultural Heritage" },
       "Ilaro is a great place to experience Yoruba culture through its traditional music, dance, festivals, and community celebrations.",
       "The town is particularly associated with Bolojo and Gelede, two cultural dance traditions connected to Ilaro's heritage. Traditional performances and festivals provide visitors with opportunities to experience these traditions within the community.",
       "Ilaro's cultural experience is not limited to one attraction. Sometimes, simply being around the town during a cultural celebration can give you a better understanding of its history and people.",
       "If you enjoy cultural tourism, ask locals about upcoming traditional events while you are in town.",
-      "5. Visit Federal Polytechnic, Ilaro",
+
+      { type: "h3", text: "5. Visit Federal Polytechnic, Ilaro" },
       "The Federal Polytechnic, Ilaro is one of the town's most prominent institutions and an important part of its identity.",
       "Established in 1979, the institution has grown into a major educational centre with extensive campuses and facilities. Its permanent site is located along the Ilaro-Oja-Odan Road, about three kilometres from Ilaro Township.",
       "The Polytechnic also provides visitors with places to see around its campus, including its East Campus Love Court and other campus facilities.",
       "If you are visiting Ilaro for an academic event, admission-related activity, graduation, conference, or to see family and friends studying there, the Polytechnic is naturally worth adding to your itinerary.",
-      "6. Explore the local Market and everyday life",
+
+      { type: "h3", text: "6. Explore the local Market and everyday life" },
       "If you want to experience the everyday side of Ilaro, spend some time exploring the local market.",
       "Markets offer a different way to understand a town. You can see local traders, food sellers, and residents going about their daily activities while discovering products and ingredients commonly used in the area.",
       "The market in Ilaro is one place visitors can explore while experiencing the commercial side of the town.",
       "Beyond the market itself, take some time to explore the surrounding streets, local businesses, and food spots. You may discover parts of Ilaro that you would otherwise miss by following only a conventional tourist itinerary.",
+
       { type: "image", src: apt.exterior4, alt: "The O' Apartments Exterior" },
-      "Where to stay when visiting Ilaro",
+
+      { type: "h2", text: "Where to stay when visiting Ilaro" },
       "After spending the day exploring Ilaro, having a comfortable place to return to can make your trip much more enjoyable.",
-      "The O' Apartments offers two fully furnished 3-bedroom ensuite apartments in Ilaro, providing a private and spacious option for families, groups and professionals.",
+      "[The O' Apartments](/) offers two fully furnished 3-bedroom ensuite apartments in Ilaro, providing a private and spacious option for families, groups and professionals.",
       "Each apartment is designed to give guests the comfort of a home while they explore Ilaro. The property also offers amenities including Wi-Fi, air conditioning, solar power and parking.",
       "For visitors coming to Ilaro for a cultural event, family occasion, business trip, or simply to explore the town, a serviced apartment can give you more space and privacy than a conventional hotel room.",
-      "Plan your visit to Ilaro",
+
+      { type: "h2", text: "Plan your visit to Ilaro" },
       "Ilaro may be a smaller destination compared with some of Ogun State's better-known tourist cities, but its history, culture, festivals, education and everyday community life give visitors plenty to experience.",
-      "If you are planning a trip, start with these five experiences:\n• Visit the Oronna Shrine\n• Experience the Oronna Ilaro Festival\n• Explore Ilaro's Yoruba cultural heritage\n• Visit Federal Polytechnic, Ilaro\n• Explore the local market and community",
-      "And when you need a comfortable place to stay, The O' Apartments gives you a spacious base from which to explore Ilaro and the wider Yewaland area."
-    ]
-  }
+      "If you are planning a trip, start with these five experiences:",
+      {
+        type: "list",
+        items: [
+          "Visit the Oronna Shrine",
+          "Experience the Oronna Ilaro Festival",
+          "Explore Ilaro's Yoruba cultural heritage",
+          "Visit Federal Polytechnic, Ilaro",
+          "Explore the local market and community",
+        ],
+      },
+      "And when you need a comfortable place to stay, [The O' Apartments](/) gives you a spacious base from which to explore Ilaro and the wider Yewaland area.",
+      "Planning your visit to Ilaro? Explore [The O' Apartments and book your stay](/).",
+    ],
+  },
 ];
 
 export function getBlogPost(id: string) {
